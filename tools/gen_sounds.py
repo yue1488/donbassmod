@@ -11,7 +11,10 @@ import sys
 import tempfile
 import wave
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:          # validate.py imports this module only for the subtitle texts (no numpy needed there)
+    np = None
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(HERE, "..", "src", "main", "resources", "assets", "donbass")
@@ -412,6 +415,8 @@ def lang_entries():
 
 
 def main():
+    if np is None:
+        sys.exit("numpy is required to synthesise the sounds (pip install numpy)")
     if not shutil.which("ffmpeg"):
         sys.exit("ffmpeg with libvorbis is required to build the OGG files")
     shutil.rmtree(SOUND_DIR, ignore_errors=True)

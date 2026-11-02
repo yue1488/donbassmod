@@ -246,17 +246,23 @@ def check_sounds_and_gear():
             f = os.path.join(ASSETS, "textures", "models", "armor", f"{m}_layer_{layer}.png")
             if not os.path.isfile(f):
                 err(f"missing armour texture {os.path.relpath(f, ASSETS)}")
-    from PIL import Image
+    def png_size(path):                      # stdlib only: the CI runner has no Pillow
+        with open(path, "rb") as fh:
+            head = fh.read(24)
+        if head[:8] != b"\x89PNG\r\n\x1a\n" or head[12:16] != b"IHDR":
+            return None
+        return struct.unpack(">II", head[16:24])
+
     for m in mats:
         for layer in (1, 2):
             f = os.path.join(ASSETS, "textures", "models", "armor", f"{m}_layer_{layer}.png")
-            if os.path.isfile(f) and Image.open(f).size != (64, 32):
+            if os.path.isfile(f) and png_size(f) != (64, 32):
                 err(f"{os.path.basename(f)} must be 64x32")
     for e in registered_entities():
         f = os.path.join(ASSETS, "textures", "entity", e + ".png")
         if not os.path.isfile(f):
             err(f"missing entity skin {e}")
-        elif Image.open(f).size != (64, 64):
+        elif png_size(f) != (64, 64):
             err(f"entity skin {e} must be 64x64")
         if not os.path.isfile(os.path.join(DATA, "loot_tables", "entities", e + ".json")):
             err(f"missing entity loot table {e}")
@@ -283,8 +289,9 @@ def check_sounds_and_gear():
         err("the boss must not have a spawn egg")
     boss_src = java_text("entity/CombineDirectorEntity.java")
     m = re.search(r"MUSIC_LOOP_TICKS\s*=\s*(\d+)", boss_src)
-    import gen_sounds
-    if not m or int(m.group(1)) != int(gen_sounds.MUSIC_SECONDS * 20):
+    secs = re.search(r"^MUSIC_SECONDS\s*=\s*([\d.]+)", open(os.path.join(HERE, "gen_sounds.py"), encoding="utf-8").read(),
+                     flags=re.M)
+    if not m or not secs or int(m.group(1)) != int(float(secs.group(1)) * 20):
         err("CombineDirectorEntity.MUSIC_LOOP_TICKS does not match gen_sounds.MUSIC_SECONDS")
     siren_loot = load(os.path.join(DATA, "loot_tables", "chests", "director_office.json")) or {}
     if "combine_siren" not in json.dumps(siren_loot):
