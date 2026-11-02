@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "donbass:block/mine_concrete",
+    "top": "donbass:block/mine_concrete",
+    "side": "donbass:block/mine_concrete"
+  }
+}

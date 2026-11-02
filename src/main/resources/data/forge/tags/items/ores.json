@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "donbass:anthracite_ore",
+    "donbass:coal_seam",
+    "donbass:deepslate_anthracite_ore"
+  ]
+}

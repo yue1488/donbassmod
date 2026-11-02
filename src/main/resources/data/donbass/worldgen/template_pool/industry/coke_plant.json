@@ -1,0 +1,23 @@
+{
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:industry/coke_plant",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 3,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:industry/coke_plant",
+        "processors": "donbass:ruined",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

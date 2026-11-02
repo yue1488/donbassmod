@@ -1,0 +1,23 @@
+{
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:industry/steelworks",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 3,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:industry/steelworks",
+        "processors": "donbass:ruined",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

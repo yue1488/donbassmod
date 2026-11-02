@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "donbass:block/steel_girder_end",
+    "side": "donbass:block/steel_girder_side"
+  }
+}

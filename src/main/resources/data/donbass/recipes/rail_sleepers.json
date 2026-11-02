@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "L",
+    "L"
+  ],
+  "key": {
+    "L": {
+      "item": "donbass:mine_timber_beam"
+    }
+  },
+  "result": {
+    "item": "donbass:rail_sleepers",
+    "count": 2
+  }
+}

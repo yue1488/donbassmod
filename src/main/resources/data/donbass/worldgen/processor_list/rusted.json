@@ -1,0 +1,61 @@
+{
+  "processors": [
+    {
+      "processor_type": "minecraft:rule",
+      "rules": [
+        {
+          "input_predicate": {
+            "block": "donbass:steel_girder",
+            "predicate_type": "minecraft:random_block_match",
+            "probability": 0.25
+          },
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "output_state": {
+            "Name": "donbass:rusty_iron_block"
+          }
+        },
+        {
+          "input_predicate": {
+            "block": "donbass:freight_wagon_plating",
+            "predicate_type": "minecraft:random_block_match",
+            "probability": 0.2
+          },
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "output_state": {
+            "Name": "donbass:rusty_plate"
+          }
+        },
+        {
+          "input_predicate": {
+            "block": "minecraft:iron_bars",
+            "predicate_type": "minecraft:random_block_match",
+            "probability": 0.3
+          },
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "output_state": {
+            "Name": "donbass:rusty_fence"
+          }
+        },
+        {
+          "input_predicate": {
+            "block": "donbass:hazard_stripes",
+            "predicate_type": "minecraft:random_block_match",
+            "probability": 0.2
+          },
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "output_state": {
+            "Name": "donbass:cracked_mine_concrete"
+          }
+        }
+      ]
+    }
+  ]
+}

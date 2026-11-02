@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "CCC"
+  ],
+  "key": {
+    "C": {
+      "item": "donbass:slag_bricks"
+    }
+  },
+  "result": {
+    "item": "donbass:slag_bricks_slab",
+    "count": 6
+  }
+}

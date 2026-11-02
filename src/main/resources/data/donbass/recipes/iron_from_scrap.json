@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "donbass:iron_scrap"
+  },
+  "result": "minecraft:iron_nugget",
+  "experience": 0.05,
+  "cookingtime": 100
+}

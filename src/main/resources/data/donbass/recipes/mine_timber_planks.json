@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "donbass:mine_timber_beam"
+    }
+  ],
+  "result": {
+    "item": "donbass:mine_timber_planks",
+    "count": 2
+  }
+}

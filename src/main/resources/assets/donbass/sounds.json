@@ -1,0 +1,138 @@
+{
+  "item.ak_shot": {
+    "sounds": [
+      "donbass:ak_shot_1",
+      "donbass:ak_shot_2"
+    ],
+    "subtitle": "subtitles.donbass.item.ak_shot"
+  },
+  "item.ak_reload": {
+    "sounds": [
+      "donbass:ak_reload"
+    ],
+    "subtitle": "subtitles.donbass.item.ak_reload"
+  },
+  "item.ak_empty": {
+    "sounds": [
+      "donbass:ak_empty"
+    ],
+    "subtitle": "subtitles.donbass.item.ak_empty"
+  },
+  "armor.coal_set": {
+    "sounds": [
+      "donbass:coal_set"
+    ],
+    "subtitle": "subtitles.donbass.armor.coal_set"
+  },
+  "entity.militia.ambient": {
+    "sounds": [
+      "donbass:militia_ambient_1",
+      "donbass:militia_ambient_2"
+    ],
+    "subtitle": "subtitles.donbass.entity.militia.ambient"
+  },
+  "entity.militia.hurt": {
+    "sounds": [
+      "donbass:militia_hurt"
+    ],
+    "subtitle": "subtitles.donbass.entity.militia.hurt"
+  },
+  "entity.militia.death": {
+    "sounds": [
+      "donbass:militia_death"
+    ],
+    "subtitle": "subtitles.donbass.entity.militia.death"
+  },
+  "entity.miner.ambient": {
+    "sounds": [
+      "donbass:miner_ambient_1",
+      "donbass:miner_ambient_2"
+    ],
+    "subtitle": "subtitles.donbass.entity.miner.ambient"
+  },
+  "entity.miner.hurt": {
+    "sounds": [
+      "donbass:miner_hurt"
+    ],
+    "subtitle": "subtitles.donbass.entity.miner.hurt"
+  },
+  "entity.miner.death": {
+    "sounds": [
+      "donbass:miner_death"
+    ],
+    "subtitle": "subtitles.donbass.entity.miner.death"
+  },
+  "entity.miner.yes": {
+    "sounds": [
+      "donbass:miner_yes"
+    ],
+    "subtitle": "subtitles.donbass.entity.miner.yes"
+  },
+  "entity.miner.no": {
+    "sounds": [
+      "donbass:miner_no"
+    ],
+    "subtitle": "subtitles.donbass.entity.miner.no"
+  },
+  "entity.director.ambient": {
+    "sounds": [
+      "donbass:director_ambient_1",
+      "donbass:director_ambient_2"
+    ],
+    "subtitle": "subtitles.donbass.entity.director.ambient"
+  },
+  "entity.director.hurt": {
+    "sounds": [
+      "donbass:director_hurt"
+    ],
+    "subtitle": "subtitles.donbass.entity.director.hurt"
+  },
+  "entity.director.death": {
+    "sounds": [
+      "donbass:director_death"
+    ],
+    "subtitle": "subtitles.donbass.entity.director.death"
+  },
+  "entity.director.roar": {
+    "sounds": [
+      "donbass:director_roar"
+    ],
+    "subtitle": "subtitles.donbass.entity.director.roar"
+  },
+  "entity.director.slam": {
+    "sounds": [
+      "donbass:director_slam"
+    ],
+    "subtitle": "subtitles.donbass.entity.director.slam"
+  },
+  "item.director_siren": {
+    "sounds": [
+      "donbass:director_siren"
+    ],
+    "subtitle": "subtitles.donbass.item.director_siren"
+  },
+  "music.director.phase1": {
+    "sounds": [
+      {
+        "name": "donbass:music_director_1",
+        "stream": true
+      }
+    ]
+  },
+  "music.director.phase2": {
+    "sounds": [
+      {
+        "name": "donbass:music_director_2",
+        "stream": true
+      }
+    ]
+  },
+  "music.director.phase3": {
+    "sounds": [
+      {
+        "name": "donbass:music_director_3",
+        "stream": true
+      }
+    ]
+  }
+}

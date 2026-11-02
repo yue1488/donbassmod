@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "RR",
+    "RR"
+  ],
+  "key": {
+    "R": {
+      "item": "donbass:rusty_plate"
+    }
+  },
+  "result": {
+    "item": "donbass:freight_wagon_plating",
+    "count": 4
+  }
+}

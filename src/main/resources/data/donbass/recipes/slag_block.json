@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "SS",
+    "SS"
+  ],
+  "key": {
+    "S": {
+      "item": "donbass:slag"
+    }
+  },
+  "result": {
+    "item": "donbass:slag_block",
+    "count": 4
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "donbass:mine_concrete"
+    },
+    {
+      "item": "donbass:coal_dust"
+    }
+  ],
+  "result": {
+    "item": "donbass:soot_stained_concrete",
+    "count": 1
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "donbass:mine_concrete"
+    },
+    {
+      "item": "donbass:mine_concrete"
+    },
+    {
+      "item": "donbass:mine_concrete"
+    },
+    {
+      "item": "donbass:mine_concrete"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
+  "result": {
+    "item": "donbass:reinforced_mine_concrete",
+    "count": 4
+  }
+}

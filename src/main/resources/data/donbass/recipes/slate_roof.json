@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "item": "donbass:polished_slag"
+    }
+  },
+  "result": {
+    "item": "donbass:slate_roof",
+    "count": 6
+  }
+}

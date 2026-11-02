@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "donbass:block/mine_timber_beam"
+    },
+    "axis=z": {
+      "model": "donbass:block/mine_timber_beam_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "donbass:block/mine_timber_beam_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

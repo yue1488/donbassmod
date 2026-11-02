@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "donbass:block/mine_timber_beam_end",
+    "side": "donbass:block/mine_timber_beam_side"
+  }
+}

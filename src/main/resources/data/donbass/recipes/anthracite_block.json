@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "donbass:anthracite"
+    }
+  },
+  "result": {
+    "item": "donbass:anthracite_block",
+    "count": 1
+  }
+}

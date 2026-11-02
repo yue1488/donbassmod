@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "CS",
+    "SC"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:cobblestone"
+    },
+    "S": {
+      "item": "donbass:slag"
+    }
+  },
+  "result": {
+    "item": "donbass:mine_concrete",
+    "count": 4
+  }
+}

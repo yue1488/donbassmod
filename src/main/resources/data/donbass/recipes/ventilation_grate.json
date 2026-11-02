@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "IGI",
+    "GIG",
+    "IGI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "donbass:rusty_fence"
+    }
+  },
+  "result": {
+    "item": "donbass:ventilation_grate",
+    "count": 2
+  }
+}

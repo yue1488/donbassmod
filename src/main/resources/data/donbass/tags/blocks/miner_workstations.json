@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "donbass:anthracite_ore",
+    "donbass:coal_bunker",
+    "donbass:coal_seam",
+    "donbass:deepslate_anthracite_ore",
+    "donbass:mine_lamp",
+    "donbass:ventilation_grate",
+    "minecraft:anvil",
+    "minecraft:blast_furnace",
+    "minecraft:coal_ore",
+    "minecraft:crafting_table",
+    "minecraft:deepslate_coal_ore",
+    "minecraft:furnace",
+    "minecraft:grindstone",
+    "minecraft:smithing_table"
+  ]
+}

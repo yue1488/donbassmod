@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "minecraft:bricks"
+    },
+    {
+      "item": "donbass:coal_dust"
+    }
+  ],
+  "result": {
+    "item": "donbass:sooty_bricks",
+    "count": 1
+  }
+}

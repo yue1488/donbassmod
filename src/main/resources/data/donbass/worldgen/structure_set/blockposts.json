@@ -1,0 +1,22 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1730107,
+    "spacing": 14,
+    "separation": 5,
+    "exclusion_zone": {
+      "other_set": "donbass:miners_settlements",
+      "chunk_count": 3
+    }
+  },
+  "structures": [
+    {
+      "structure": "donbass:blockpost_north",
+      "weight": 1
+    },
+    {
+      "structure": "donbass:blockpost_south",
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "GIP",
+    "PMI",
+    "W  "
+  ],
+  "key": {
+    "G": {
+      "item": "donbass:steel_girder"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "P": {
+      "item": "donbass:gun_parts"
+    },
+    "M": {
+      "item": "donbass:rifle_magazine"
+    },
+    "W": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "item": "donbass:ak_rifle",
+    "count": 1
+  }
+}

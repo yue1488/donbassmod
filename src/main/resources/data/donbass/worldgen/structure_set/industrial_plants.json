@@ -1,0 +1,22 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1730105,
+    "spacing": 18,
+    "separation": 6,
+    "exclusion_zone": {
+      "other_set": "donbass:miners_settlements",
+      "chunk_count": 4
+    }
+  },
+  "structures": [
+    {
+      "structure": "donbass:steelworks",
+      "weight": 1
+    },
+    {
+      "structure": "donbass:coke_plant",
+      "weight": 1
+    }
+  ]
+}

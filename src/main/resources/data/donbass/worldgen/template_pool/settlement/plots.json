@@ -1,0 +1,131 @@
+{
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_0_brick_hut",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_10_panel_panel",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_11_shed_well",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_12_brick_shop",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 3,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_13_hut_brick",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 4,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_1_hut_hut",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 4,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_2_brick_brick",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 3,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_3_barrack_garden",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_4_panel_brick",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_5_shop_hut",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_6_garden_shed",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_7_well_brick",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 3,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_8_hut_garden",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/plot_9_barrack_barrack",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

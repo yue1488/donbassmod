@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "donbass:block/rail_sleepers"
+    },
+    "axis=z": {
+      "model": "donbass:block/rail_sleepers_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "donbass:block/rail_sleepers_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "donbass:block/slag_bricks_slab"
+    },
+    "type=top": {
+      "model": "donbass:block/slag_bricks_slab_top"
+    },
+    "type=double": {
+      "model": "donbass:block/slag_bricks"
+    }
+  }
+}

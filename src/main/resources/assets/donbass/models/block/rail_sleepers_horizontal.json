@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "donbass:block/rail_sleepers_end",
+    "side": "donbass:block/rail_sleepers_side"
+  }
+}

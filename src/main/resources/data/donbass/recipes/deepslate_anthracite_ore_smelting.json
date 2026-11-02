@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "donbass:deepslate_anthracite_ore"
+  },
+  "result": "donbass:anthracite",
+  "experience": 0.2,
+  "cookingtime": 200
+}

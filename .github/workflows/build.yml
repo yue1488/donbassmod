@@ -1,0 +1,30 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Validate content (JSON, structures, references)
+        run: python3 tools/validate.py
+      - name: Build (jar is reobfuscated by reobfJar)
+        run: |
+          chmod +x gradlew
+          ./gradlew build --no-daemon
+      - name: Show jar contents
+        run: |
+          ls -l build/libs
+          unzip -l build/libs/*.jar | head -40
+      - uses: actions/upload-artifact@v4
+        with:
+          name: donbass-mod
+          path: build/libs/*.jar

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PBP",
+    "GDG",
+    "P P"
+  ],
+  "key": {
+    "P": {
+      "item": "donbass:coal_plate"
+    },
+    "B": {
+      "item": "minecraft:bell"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "item": "donbass:combine_siren",
+    "count": 1
+  }
+}

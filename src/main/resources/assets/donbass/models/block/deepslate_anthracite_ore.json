@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "donbass:block/deepslate_anthracite_ore"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/center_monument",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:settlement/center_water_tower",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

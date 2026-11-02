@@ -1,0 +1,41 @@
+{
+  "fallback": "donbass:rail/ends",
+  "elements": [
+    {
+      "weight": 4,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:rail/line_plain",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:rail/line_signal",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:rail/line_wreck",
+        "processors": "donbass:ruined",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "donbass:rail/line_crossing",
+        "processors": "donbass:weathered",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

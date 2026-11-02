@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "donbass:rusty_gear"
+  },
+  "result": "minecraft:iron_ingot",
+  "experience": 0.3,
+  "cookingtime": 200
+}

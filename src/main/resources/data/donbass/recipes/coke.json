@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "minecraft:coal"
+  },
+  "result": "donbass:coke",
+  "experience": 0.35,
+  "cookingtime": 400
+}

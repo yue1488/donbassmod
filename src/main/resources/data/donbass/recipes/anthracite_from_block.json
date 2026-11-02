@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "donbass:anthracite_block"
+    }
+  ],
+  "result": {
+    "item": "donbass:anthracite",
+    "count": 9
+  }
+}

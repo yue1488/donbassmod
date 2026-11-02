@@ -1,0 +1,11 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "step": "underground_ores",
+  "features": [
+    "donbass:coal_seam_upper",
+    "donbass:coal_seam_deep",
+    "donbass:anthracite_ore",
+    "donbass:anthracite_ore_buried"
+  ]
+}

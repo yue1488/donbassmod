@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1730102,
+    "spacing": 10,
+    "separation": 4
+  },
+  "structures": [
+    {
+      "structure": "donbass:shallow_mine",
+      "weight": 1
+    }
+  ]
+}

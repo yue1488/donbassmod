@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "minecraft:gravel"
+    },
+    {
+      "item": "donbass:slag"
+    }
+  ],
+  "result": {
+    "item": "donbass:railway_ballast",
+    "count": 2
+  }
+}

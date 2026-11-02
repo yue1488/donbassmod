@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "donbass:clay_plaster",
+    "donbass:railway_ballast",
+    "donbass:spoil_gravel"
+  ]
+}

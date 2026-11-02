@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "donbass:iron_scrap"
+    },
+    {
+      "item": "donbass:iron_scrap"
+    },
+    {
+      "item": "donbass:iron_scrap"
+    },
+    {
+      "item": "donbass:iron_scrap"
+    },
+    {
+      "item": "minecraft:redstone"
+    }
+  ],
+  "result": {
+    "item": "donbass:gun_parts",
+    "count": 1
+  }
+}
