@@ -17,6 +17,11 @@ import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 /**
  * How the AK looks in hand: a two-handed rifle pose in third person (crossbow hold, crossbow charge while
  * reloading) and a custom first-person transform with recoil and a reload dip.
+ *
+ * <p>Orientation (see tools/rifle_model.py): the 3D model's barrel points to -z, its stock to +z, the magazine
+ * hangs below. In first person the item frame is the camera frame (x right, y up, -z forward) and in third person,
+ * with the crossbow arm pose, the item frame is (x right, y up, z backward) too, so the model needs no rotation
+ * in the hand: the barrel points where the player looks. The display transforms live in the model JSON.
  */
 public class AkClientExtensions implements IClientItemExtensions {
     @Override
@@ -36,7 +41,8 @@ public class AkClientExtensions implements IClientItemExtensions {
 
         float recoil = RifleClientState.recoil;
         poseStack.translate(0.0F, recoil * 0.015F, recoil * 0.09F);
-        poseStack.mulPose(Axis.XP.rotationDegrees(-recoil * 3.5F));
+        // the rifle's barrel points to -z (the camera looks along -z): a POSITIVE turn about x lifts the muzzle
+        poseStack.mulPose(Axis.XP.rotationDegrees(recoil * 3.5F));
 
         if (AkRifleItem.isReloading(stack) && Minecraft.getInstance().level != null) {
             float total = Math.max(1, DonbassConfig.rifleReloadTicks());

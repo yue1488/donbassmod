@@ -357,6 +357,54 @@ def check_assets():
     print(f"  assets: {len(BLOCKS)} blocks, {len(ITEMS)} items, {n_models} models")
 
 
+def check_rifle_model():
+    """The AK must stay a real 3D model with identity-like hand transforms (0.2.0 used a flat sprite with the
+    crossbow's Rx(-90) transforms, which laid the rifle on its side). See docs/AK_ORIENTATION.md."""
+    path = os.path.join(ASSETS, "models", "item", "ak_rifle.json")
+    d = load(path)
+    if d is None:
+        return
+    if not d.get("elements"):
+        err("ak_rifle.json: no 'elements': the rifle must be a 3D model (a flat sprite is edge-on in the hands)")
+        return
+    if d.get("parent", "").endswith("generated") or d.get("parent", "").endswith("handheld"):
+        err("ak_rifle.json: parent item/generated / handheld would turn it into a flat sprite again")
+    for key in ("thirdperson_righthand", "thirdperson_lefthand", "firstperson_righthand", "firstperson_lefthand"):
+        t = (d.get("display") or {}).get(key)
+        if not t:
+            err(f"ak_rifle.json: display.{key} missing")
+            continue
+        rx, ry, rz = t.get("rotation", [0, 0, 0])
+        if rx != 0 or rz != 0 or abs(ry) > 20:
+            err(f"ak_rifle.json: display.{key}.rotation {t.get('rotation')}: the model's barrel is -z, so a hand "
+                "transform may only yaw it by a few degrees (a big x/z rotation lays the rifle on its side)")
+    for key in ("gui", "ground", "fixed"):
+        if key not in (d.get("display") or {}):
+            err(f"ak_rifle.json: display.{key} missing")
+    tex_ref = d.get("textures", {}).get("0", "")
+    tex = os.path.join(ASSETS, "textures", tex_ref[8:] + ".png") if tex_ref.startswith("donbass:") else None
+    if not tex or not os.path.isfile(tex):
+        err(f"ak_rifle.json: texture {tex_ref} missing")
+    for el in d["elements"]:
+        for face in el["faces"].values():
+            if face.get("texture") != "#0" or not all(0 <= u <= 16 for u in face["uv"]):
+                err(f"ak_rifle.json: element {el.get('name')}: bad face {face}")
+        for a, b in zip(el["from"], el["to"]):
+            if not (-16 <= a <= 32 and -16 <= b <= 32 and a <= b):
+                err(f"ak_rifle.json: element {el.get('name')}: from/to {el['from']}/{el['to']} out of range")
+        rot = el.get("rotation")
+        if rot and rot["angle"] not in (-45, -22.5, 0, 22.5, 45):
+            err(f"ak_rifle.json: element {el.get('name')}: rotation angle {rot['angle']} not allowed by the model format")
+    # the muzzle must be at the front (-z), the stock at the back
+    zs = {e["name"]: (e["from"][2] + e["to"][2]) / 2 for e in d["elements"]}
+    if not (zs["muzzle_brake"] < zs["receiver"] < zs["butt_plate"]):
+        err("ak_rifle.json: barrel / receiver / stock are not ordered front-to-back along -z")
+    ys = {e["name"]: (e["from"][1] + e["to"][1]) / 2 for e in d["elements"]}
+    if not (ys["magazine"] < ys["receiver"] < ys["rear_sight"]):
+        err("ak_rifle.json: magazine / receiver / sights are not ordered bottom-to-top")
+    print("  rifle model: 3D, barrel -z, magazine below, hand transforms near identity")
+
+
 def check_lang():
     from gen_sounds import lang_entries
     expected = ({f"block.donbass.{b['id']}" for b in BLOCKS} | {f"item.donbass.{i['id']}" for i in ITEMS}
@@ -500,6 +548,8 @@ def check_worldgen():
             if isinstance(proc, str) and not has("processor_list", proc, "processor_list"):
                 err(f"pool {name}: unknown processor list {proc}")
     for t in templates - used_templates:
+        if t.startswith("gametest/"):               # test arenas are loaded by name by the GameTests, not by a pool
+            continue
         warnings.append(f"template {t} is not used by any pool")
     for name in have["processor_list"]:
         d = load(os.path.join(wg, "processor_list", name + ".json"))
@@ -605,10 +655,73 @@ def check_java_imports():
     print(f"  java imports: {len(files)} files checked")
 
 
+def method_body(src, signature_regex):
+    """Text of the first method whose declaration matches the regex (brace matching, strings/comments not special)."""
+    m = re.search(signature_regex, src)
+    if not m:
+        return None
+    i = src.index("{", m.end() - 1 if src[m.end() - 1] == "{" else m.end())
+    depth, j = 0, i
+    while j < len(src):
+        if src[j] == "{":
+            depth += 1
+        elif src[j] == "}":
+            depth -= 1
+            if depth == 0:
+                return src[i:j + 1]
+        j += 1
+    return None
+
+
+def check_boss():
+    """Regression guards for the 0.2.0 bug 'the boss takes no damage from phase 2 on'.
+    Cause: the phase-change lock was an isImmobile() override. LivingEntity.aiStep() skips serverAiStep() for an
+    immobile entity, so the timers counted down in customServerAiStep() never ran out and hurt() (which refuses
+    damage during the lock) refused it for ever."""
+    mod_dir = os.path.join(JAVA, "com", "donbass", "mod")
+    ent_dir = os.path.join(mod_dir, "entity")
+    for p in glob.glob(os.path.join(ent_dir, "**", "*.java"), recursive=True):
+        src = open(p, encoding="utf-8").read()
+        body = re.sub(r"//[^\n]*|/\*.*?\*/", " ", src, flags=re.S)
+        if re.search(r"boolean\s+isImmobile\s*\(", body):
+            err(f"{os.path.relpath(p, JAVA)}: overrides isImmobile(): it switches the AI step off (the boss freeze / "
+                "invulnerability bug of 0.2.0). Use a plain flag and handle it in customServerAiStep()/goals")
+    path = os.path.join(ent_dir, "CombineDirectorEntity.java")
+    src = re.sub(r"//[^\n]*|/\*.*?\*/", " ", open(path, encoding="utf-8").read(), flags=re.S)
+    hurt = method_body(src, r"public\s+boolean\s+hurt\s*\(")
+    if hurt is None:
+        err("CombineDirectorEntity: hurt() override not found")
+    else:
+        if re.search(r"getPhase|phase", hurt):
+            err("CombineDirectorEntity.hurt() depends on the phase: damage rules must not differ between phases")
+        if not re.search(r"transition\s*>\s*0", hurt):
+            err("CombineDirectorEntity.hurt(): the only allowed refusal is the short phase-change roar (transition > 0)")
+    tick = method_body(src, r"public\s+void\s+tick\s*\(")
+    if tick is None or "tickTransition" not in tick:
+        err("CombineDirectorEntity: the roar countdown (tickTransition) must run from tick(), not from the AI step")
+    ai = method_body(src, r"void\s+customServerAiStep\s*\(")
+    if ai is not None and "tickTransition" in ai:
+        err("CombineDirectorEntity: tickTransition() must not be called from customServerAiStep()")
+    if not re.search(r"Attributes\.ARMOR\s*,\s*0\.0D", src):
+        err("CombineDirectorEntity: base ARMOR must be 0 (the coal armour it wears already gives 15)")
+    test = os.path.join(mod_dir, "gametest", "BossGameTests.java")
+    if not os.path.exists(test):
+        err("gametest/BossGameTests.java is missing (regression tests of the boss phases)")
+    else:
+        tsrc = open(test, encoding="utf-8").read()
+        for needle in ("bossTakesDamageInEveryPhase", "getPhase() == 2", "getPhase() == 3", "isLocked"):
+            if needle not in tsrc:
+                err(f"BossGameTests: expected '{needle}'")
+        m = re.search(r'ARENA\s*=\s*"([^"]+)"', tsrc)
+        if not m or not os.path.exists(os.path.join(DATA, "structures", m.group(1) + ".nbt")):
+            err("BossGameTests: arena template data/donbass/structures/<ARENA>.nbt is missing")
+    print("  boss: phase lock / damage rules / game tests checked")
+
+
 def main():
     print("Validating Donbass mod...")
     for fn in (check_templates, check_sounds_and_gear, check_assets, check_lang, check_recipes_and_loot,
-               check_worldgen, check_java, check_java_imports):
+               check_rifle_model, check_worldgen, check_java, check_java_imports, check_boss):
         fn()
     for w in warnings:
         print("  warning:", w)

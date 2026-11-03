@@ -30,12 +30,12 @@ public final class DonbassConfig {
                 "Mobs that are part of a structure when it is generated are not affected.").push("spawning");
         MINER_SPAWN_CHANCE = b.comment("Chance (0..1) that a natural spawn attempt of a miner succeeds. 0 disables natural miner spawns.")
                 .defineInRange("minerSpawnChance", 0.5D, 0.0D, 1.0D);
-        FIGHTER_SPAWN_CHANCE = b.comment("Chance (0..1) that a natural spawn attempt of a Squad fighter succeeds. 0 disables natural fighter spawns.")
+        FIGHTER_SPAWN_CHANCE = b.comment("Chance (0..1) that a natural spawn attempt of a militiaman (DPR / LPR) succeeds. 0 disables natural fighter spawns.")
                 .defineInRange("fighterSpawnChance", 0.5D, 0.0D, 1.0D);
         b.pop();
 
         b.push("fighters");
-        FACTIONS_FIGHT = b.comment("Squad North and Squad South fighters attack each other on sight.")
+        FACTIONS_FIGHT = b.comment("DPR and LPR militiamen attack each other on sight (set false to make them ignore each other).")
                 .define("factionsFight", true);
         FIGHTER_DAMAGE_MULTIPLIER = b.comment("Multiplier for the damage of fighter bullets (1.0 = default).")
                 .defineInRange("fighterDamageMultiplier", 1.0D, 0.0D, 10.0D);

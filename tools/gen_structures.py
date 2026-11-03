@@ -12,6 +12,7 @@ import structures_military
 import structures_mines
 import structures_town
 from gen_worldgen import DATA, WG, wj
+from nbt import Tpl
 from populate import fighter_nbt, miner_nbt, populate
 
 N = "donbass:"
@@ -102,6 +103,12 @@ def main():
             assert 0 <= x < sx and 0 <= y < sy and 0 <= z < sz, f"{name}: block {(x, y, z)} outside {tpl.size}"
         tpl.save(os.path.join(NBT_DIR, name + ".nbt"))
     grounds = {n: g for n, (_, g) in templates.items()}
+
+    # the empty arena of the GameTests (gametest/BossGameTests.java): a flat floor, nothing else. It is not part of
+    # any pool, so it never generates in the world; the validator knows it by the "gametest/" prefix.
+    arena = Tpl(15, 8, 15)
+    arena.fill(0, 0, 0, 14, 0, 14, "minecraft:stone")
+    arena.save(os.path.join(NBT_DIR, "gametest", "arena.nbt"))
 
     # ---- mines: one single-piece structure each, buried so that the yard lands on the surface
     for kind, proc in (("shallow", "abandoned"), ("active", "weathered"), ("deep", "abandoned")):

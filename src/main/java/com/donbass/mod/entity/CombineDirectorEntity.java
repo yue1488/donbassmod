@@ -124,8 +124,9 @@ public class CombineDirectorEntity extends Monster {
                 .add(Attributes.ATTACK_DAMAGE, 9.0D)
                 .add(Attributes.FOLLOW_RANGE, 48.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
-                .add(Attributes.ARMOR, 8.0D)
-                .add(Attributes.ARMOR_TOUGHNESS, 4.0D);
+                // no base armour: the coal armour it wears already adds 15 armour points (more would make it immune)
+                .add(Attributes.ARMOR, 0.0D)
+                .add(Attributes.ARMOR_TOUGHNESS, 0.0D);
     }
 
     // ------------------------------------------------------------- state ----
@@ -235,17 +236,28 @@ public class CombineDirectorEntity extends Monster {
 
     // ------------------------------------------------------------ the fight ----
     @Override
+    public void tick() {
+        super.tick();
+        if (!this.level().isClientSide && transition > 0) {
+            tickTransition();
+        }
+    }
+
+    @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
         if (!initialized) {
             setUp();
         }
         this.bossEvent.setProgress(Mth.clamp(this.getHealth() / this.getMaxHealth(), 0.0F, 1.0F));
+        if (isLocked()) {
+            this.getNavigation().stop();
+            this.setDeltaMovement(0.0D, this.getDeltaMovement().y, 0.0D);
+        }
         updatePhase();
         tickMusic();
         tickStrikes();
-        if (transition > 0) {
-            tickTransition();
+        if (transition > 0) {                          // phase change roar; the countdown itself runs in tick()
             return;
         }
         LivingEntity target = this.getTarget();
@@ -304,6 +316,11 @@ public class CombineDirectorEntity extends Monster {
         }
     }
 
+    /**
+     * Counts the phase-change roar down. Called from tick(), NOT from the AI step: the boss is invulnerable while the
+     * roar lasts, so its countdown must not depend on the AI running (NoAI, an immobile override, a paused goal
+     * selector ...) - otherwise the boss could stay invulnerable for ever.
+     */
     private void tickTransition() {
         transition--;
         if (this.level() instanceof ServerLevel server && transition % 6 == 0) {
@@ -502,9 +519,14 @@ public class CombineDirectorEntity extends Monster {
         return super.hurt(source, bypass ? amount : Math.min(amount, MAX_HIT));
     }
 
-    @Override
-    protected boolean isImmobile() {
-        return super.isImmobile() || transition > 0 || slamWindup > 0;
+    /**
+     * True while the boss is busy (phase change roar, slam wind-up): it stands still and is not steered by its goals.
+     * Do NOT express this by overriding isImmobile(): LivingEntity.aiStep() skips serverAiStep() (and with it
+     * customServerAiStep(), where the timers below count down) for an immobile entity, so the boss would stay
+     * locked - and, during the phase change, invulnerable - for ever. tools/validate.py guards against that.
+     */
+    public boolean isLocked() {
+        return transition > 0 || slamWindup > 0;
     }
 
     @Override

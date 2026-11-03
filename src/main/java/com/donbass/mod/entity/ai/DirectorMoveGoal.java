@@ -60,6 +60,10 @@ public class DirectorMoveGoal extends Goal {
         boolean canSee = boss.getSensing().hasLineOfSight(target);
         int phase = boss.getPhase();
         boss.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        if (boss.isLocked()) {                       // phase change or slam wind-up: stand still, do not strike
+            boss.getNavigation().stop();
+            return;
+        }
         if (meleeCooldown > 0) {
             meleeCooldown--;
         }

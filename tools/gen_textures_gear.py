@@ -417,6 +417,31 @@ def i_rifle(_n):
     return im
 
 
+def i_rifle_model(_n):
+    """Colour swatches (4x4 px each) for the 3D rifle model; the layout is tools/rifle_model.py: SWATCHES."""
+    import random
+    from rifle_model import SWATCHES
+    base = {
+        "steel_dark": (44, 47, 54), "steel_mid": (72, 76, 86), "steel_light": (118, 124, 138), "black": (16, 17, 20),
+        "wood_dark": (96, 60, 30), "wood_mid": (128, 82, 42), "wood_light": (156, 106, 58), "wood_grain": (108, 70, 36),
+        "magazine": (58, 56, 50), "brass": (184, 138, 52), "highlight": (170, 176, 188), "mark": (140, 44, 38),
+    }
+    rng = random.Random(1730)
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 255))
+    for name, (col, row) in SWATCHES.items():
+        r, g, b = base[name]
+        for y in range(4):
+            for x in range(4):
+                d = rng.randint(-5, 5)
+                if name.startswith("wood") and x in (1, 2):                      # a darker grain line
+                    d -= 7 if (x + y) % 2 == 0 else 2
+                if name == "magazine" and y in (1, 3):                           # ribs of the pressed magazine
+                    d += 9
+                im.putpixel((col * 4 + x, row * 4 + y),
+                            (max(0, min(255, r + d)), max(0, min(255, g + d)), max(0, min(255, b + d)), 255))
+    return im
+
+
 # ---------------------------------------------------------------- entity skins ----
 SKIN = (196, 150, 118)
 SKIN_D = (170, 126, 98)
@@ -757,7 +782,7 @@ def main():
     from content import ARMOR_SETS
     count = 0
     for name, fn in (("rifle_cartridge", i_cartridge), ("rifle_magazine", i_magazine), ("gun_parts", i_gun_parts),
-                     ("coal_plate", i_coal_plate), ("ak_rifle", i_rifle), ("combine_siren", i_siren),
+                     ("coal_plate", i_coal_plate), ("ak_rifle", i_rifle), ("ak_rifle_model", i_rifle_model), ("combine_siren", i_siren),
                      ("director_pickaxe", i_director_pickaxe), ("director_badge", i_director_badge)):
         save(fn(name), ITEM_DIR, name)
         count += 1

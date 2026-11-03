@@ -45,7 +45,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * A fighter of one of the two fictional squads (North in the "Steppe" uniform, South in the "Terricone" one).
+ * A militiaman: "Ополченец ДНР" (entity north_fighter, "Steppe" uniform) or "Ополченец ЛНР" (south_fighter, "Terricone" uniform).
  * Three ranks with their own health, damage, accuracy, equipment and drops. The fighters shoot with a rifle
  * (hitscan, see Ballistics), patrol around the place they were created at, follow a higher-ranking comrade,
  * call their squad when hurt and attack the other squad on sight.

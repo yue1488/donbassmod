@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 
+import rifle_model
 from content import BLOCKS, ITEMS, LANG_EXTRA, RECIPES, MOD_ID
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -117,18 +118,6 @@ def gen_block_assets():
             raise ValueError("unknown kind " + k)
 
 
-RIFLE_MODEL_DISPLAY = {
-    # held like a crossbow: the third-person pose is HumanoidModel.ArmPose.CROSSBOW_HOLD (see AkClientExtensions)
-    "thirdperson_righthand": {"rotation": [-90, 0, -60], "translation": [2, 0.1, -3], "scale": [0.9, 0.9, 0.9]},
-    "thirdperson_lefthand": {"rotation": [-90, 0, 30], "translation": [2, 0.1, -3], "scale": [0.9, 0.9, 0.9]},
-    "firstperson_righthand": {"rotation": [-90, 0, -55], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
-    "firstperson_lefthand": {"rotation": [-90, 0, 35], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
-    "gui": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
-    "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
-    "fixed": {"rotation": [0, 180, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
-}
-
-
 def gen_item_assets():
     for it in ITEMS:
         path = os.path.join(ASSETS, "models", "item", it["id"] + ".json")
@@ -136,8 +125,8 @@ def gen_item_assets():
         if k == "egg":
             wj(path, {"parent": "minecraft:item/template_spawn_egg"})
         elif k == "rifle":
-            wj(path, {"parent": "minecraft:item/generated", "textures": {"layer0": N + "item/" + it["id"]},
-                      "display": RIFLE_MODEL_DISPLAY})
+            # a real 3D model (the flat sprite lay on its side in the hands): tools/rifle_model.py
+            wj(path, rifle_model.model_json(N + "item/" + it["id"] + "_model", N + "item/" + it["id"]))
         else:
             parent = "minecraft:item/handheld" if k == "pickaxe" else "minecraft:item/generated"
             wj(path, {"parent": parent, "textures": {"layer0": N + "item/" + it["id"]}})
