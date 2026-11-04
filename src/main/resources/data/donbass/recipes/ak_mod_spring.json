@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "item": "donbass:coke"
+    },
+    {
+      "item": "donbass:gun_parts"
+    }
+  ],
+  "result": {
+    "item": "donbass:ak_mod_spring",
+    "count": 1
+  }
+}

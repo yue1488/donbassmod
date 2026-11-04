@@ -46,6 +46,14 @@ def gen_block_assets():
             wj(mdl(i), m)
             wj(item_model, {"parent": N + "block/" + i})
 
+        elif k == "workbench":
+            top, side, bottom = t
+            wj(bs, {"variants": {"": {"model": N + "block/" + i}}})
+            wj(mdl(i), {"parent": "minecraft:block/cube_bottom_top",
+                        "textures": {"top": N + "block/" + top, "side": N + "block/" + side,
+                                     "bottom": N + "block/" + bottom}})
+            wj(item_model, {"parent": N + "block/" + i})
+
         elif k == "pillar":
             side, end = t
             wj(bs, {"variants": {
@@ -186,7 +194,7 @@ def recipe_category(r):
         return "blocks" if own in BY_ID else "misc"
     if own in BY_ID:
         return "building"
-    equipment = {"miners_pickaxe", "ak_rifle"} | {i["id"] for i in ITEMS if i["kind"] == "armor"}
+    equipment = ({"miners_pickaxe", "ak_rifle"} | {i["id"] for i in ITEMS if i["kind"] in ("armor", "akmod")})
     return "equipment" if own in equipment else "misc"
 
 
@@ -273,6 +281,7 @@ def gen_java():
     os.makedirs(JAVA, exist_ok=True)
     lines = [HEADER, "package com.donbass.mod.registry;\n",
              "import com.donbass.mod.DonbassMod;",
+             "import com.donbass.mod.block.WeaponWorkbenchBlock;",
              "import java.util.function.Supplier;",
              "import net.minecraft.world.item.BlockItem;",
              "import net.minecraft.world.item.Item;",
@@ -318,6 +327,8 @@ def gen_java():
             ctor = f"new SandBlock(0x{b['falling_color']:06X}, {props})"
         elif k == "magma":
             ctor = f"new MagmaBlock({props})"
+        elif k == "workbench":
+            ctor = f"new WeaponWorkbenchBlock({props})"
         else:
             raise ValueError(k)
         lines.append(f"    public static final RegistryObject<Block> {const} =")
@@ -328,6 +339,8 @@ def gen_java():
 
     lines = [HEADER, "package com.donbass.mod.registry;\n",
              "import com.donbass.mod.DonbassMod;",
+             "import com.donbass.mod.item.AkModItem;",
+             "import com.donbass.mod.item.AkMods;",
              "import com.donbass.mod.item.AkRifleItem;",
              "import com.donbass.mod.item.CombineSirenItem;",
              "import com.donbass.mod.item.DonbassArmorItem;",
@@ -369,6 +382,8 @@ def gen_java():
             ctor = "new Item(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant())"
         elif k == "rifle":
             ctor = "new AkRifleItem(new Item.Properties().stacksTo(1))"
+        elif k == "akmod":
+            ctor = f"new AkModItem(new Item.Properties().stacksTo(16), AkMods.Mod.{it['mod']})"
         elif k == "armor":
             ctor = (f"new DonbassArmorItem(ModArmorMaterials.{it['mat']}, ArmorItem.Type.{it['slot']}, "
                     f"new Item.Properties())")

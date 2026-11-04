@@ -124,8 +124,13 @@ block("rail_sleepers", ("Rail Sleepers", "Шпалы", "Podkłady kolejowe"),
 block("freight_wagon_plating", ("Freight Wagon Plating", "Обшивка грузового вагона", "Poszycie wagonu towarowego"),
       props=("TERRACOTTA_RED", 3.0, 9.0, "METAL", True, 0))
 
+# --- 0.3.0: the weapon workbench (opens a GUI; tex = (top, side, bottom)) --------------------------------
+block("weapon_workbench", ("Weapon Workbench", "Оружейный верстак", "Warsztat zbrojeniowy"),
+      kind="workbench", tex=("weapon_workbench_top", "weapon_workbench_side", "mine_concrete"),
+      props=("METAL", 3.0, 6.0, "METAL", True, 0))
+
 # ----------------------------------------------------------------- items ----
-# kind: plain | food | fuel | ticket | pickaxe | rifle | armor | egg
+# kind: plain | food | fuel | ticket | pickaxe | rifle | armor | egg | akmod (mod -> AkMods.Mod constant)
 #   armor -> mat (ModArmorMaterials constant), slot (HELMET|CHESTPLATE|LEGGINGS|BOOTS)
 #   egg   -> entity (ModEntities constant), colors (background, highlight)
 ITEMS = []
@@ -152,6 +157,18 @@ item("rifle_magazine", ("Rifle Magazine", "Магазин для автомат�
 item("gun_parts", ("Weapon Parts", "Оружейные запчасти", "Części do broni"))
 item("coal_plate", ("Coal Plate", "Угольная пластина", "Płyta węglowa"))
 item("ak_rifle", ("AK Assault Rifle", "Автомат АК", "Karabinek AK"), kind="rifle")
+
+# --- 0.3.0: AK modification kits (installed at the weapon workbench, see item/AkMods.java) --------------------
+item("ak_mod_magazine", ("AK Extended Magazine Kit", "Комплект «Увеличенный магазин»", "Zestaw „Powiększony magazynek”"),
+     kind="akmod", mod="MAGAZINE")
+item("ak_mod_mechanism", ("AK Improved Reload Mechanism", "Улучшенный механизм перезарядки", "Ulepszony mechanizm przeładowania"),
+     kind="akmod", mod="MECHANISM")
+item("ak_mod_stabilizer", ("AK Stabilizer", "Стабилизатор для АК", "Stabilizator do AK"),
+     kind="akmod", mod="STABILIZER")
+item("ak_mod_barrel", ("AK Reinforced Barrel", "Усиленный ствол для АК", "Wzmocniona lufa do AK"),
+     kind="akmod", mod="BARREL")
+item("ak_mod_spring", ("AK Improved Spring", "Улучшенная пружина для АК", "Ulepszona sprężyna do AK"),
+     kind="akmod", mod="SPRING")
 
 # --- 0.2.0: armour (4 sets x 4 pieces) ----------------------------------------
 HELMET, CHEST, LEGS, BOOTS = "HELMET", "CHESTPLATE", "LEGGINGS", "BOOTS"
@@ -439,4 +456,65 @@ LANG_EXTRA.update({
     "tooltip.donbass.director_badge": ("A trophy: proof that the shift was survived.",
                                        "Трофей: доказательство того, что смена пережита.",
                                        "Trofeum: dowód, że zmianę udało się przetrwać."),
+})
+
+# ---- 0.3.0: weapon workbench and AK modifications (game conventions, not manufacturing instructions) ----
+RECIPES.update({
+    "weapon_workbench": _shaped(["GGG", "PTP", "I I"], {"G": D + "steel_girder", "P": D + "gun_parts",
+                                                        "T": V + "crafting_table", "I": V + "iron_ingot"},
+                                D + "weapon_workbench"),
+    "ak_mod_magazine": _shapeless([D + "rifle_magazine", D + "gun_parts", V + "iron_ingot", V + "iron_ingot"],
+                                  D + "ak_mod_magazine"),
+    "ak_mod_mechanism": _shapeless([D + "gun_parts", D + "gun_parts", V + "redstone", V + "redstone", D + "rusty_gear"],
+                                   D + "ak_mod_mechanism"),
+    "ak_mod_stabilizer": _shapeless([D + "steel_girder", D + "gun_parts", V + "redstone", V + "iron_ingot"],
+                                    D + "ak_mod_stabilizer"),
+    "ak_mod_barrel": _shapeless([D + "coal_plate", D + "coal_plate", D + "steel_girder", D + "gun_parts"],
+                                D + "ak_mod_barrel"),
+    "ak_mod_spring": _shapeless([V + "iron_ingot", V + "iron_ingot", V + "redstone", D + "coke", D + "gun_parts"],
+                                D + "ak_mod_spring"),
+})
+
+# "%%" is a literal percent sign in Minecraft translation strings
+LANG_EXTRA.update({
+    "tooltip.donbass.ak_mod_magazine": ("+50%% magazine capacity (loaded rounds are kept)",
+                                        "+50%% к вместимости магазина (заряженные патроны сохраняются)",
+                                        "+50%% pojemności magazynka (załadowane naboje zostają)"),
+    "tooltip.donbass.ak_mod_mechanism": ("-20%% reload time", "−20%% ко времени перезарядки",
+                                         "-20%% czasu przeładowania"),
+    "tooltip.donbass.ak_mod_stabilizer": ("-20%% bullet spread", "−20%% к разбросу пуль", "-20%% rozrzutu pocisków"),
+    "tooltip.donbass.ak_mod_barrel": ("-10%% bullet spread (damage is unchanged)",
+                                      "−10%% к разбросу пуль (урон не меняется)",
+                                      "-10%% rozrzutu pocisków (obrażenia bez zmian)"),
+    "tooltip.donbass.ak_mod_spring": ("+10%% rate of fire", "+10%% к скорострельности", "+10%% szybkostrzelności"),
+    "tooltip.donbass.ak_mod_install": ("Install at a Weapon Workbench; one of each kind per rifle.",
+                                       "Устанавливается на оружейном верстаке; каждый вид — один раз на автомат.",
+                                       "Montuje się w warsztacie zbrojeniowym; każdy rodzaj raz na karabinek."),
+    "tooltip.donbass.rifle_mods": ("Modifications:", "Модификации:", "Modyfikacje:"),
+    "gui.donbass.workbench.install": ("Install", "Установить", "Zainstaluj"),
+    "gui.donbass.workbench.duplicate": ("Already installed", "Уже установлено", "Już zainstalowano"),
+    "gui.donbass.workbench.hint": ("Put the AK and kits into the slots, then press Install.",
+                                   "Положите АК и комплекты в слоты, затем нажмите «Установить».",
+                                   "Włóż AK i zestawy do slotów, potem naciśnij „Zainstaluj”."),
+    "gui.donbass.workbench.installed": ("Installed", "Установлено", "Zainstalowano"),
+    "gui.donbass.workbench.not_installed": ("Not installed", "Не установлено", "Nie zainstalowano"),
+    "gui.donbass.workbench.stat.magazine": ("Magazine", "Магазин", "Magazynek"),
+    "gui.donbass.workbench.stat.reload": ("Reload", "Перезарядка", "Przeładowanie"),
+    "gui.donbass.workbench.stat.rate": ("Rate of fire", "Скорострельность", "Szybkostrzelność"),
+    "gui.donbass.workbench.stat.spread": ("Spread", "Разброс", "Rozrzut"),
+    "gui.donbass.workbench.unit.rounds": ("%s rounds", "%s патр.", "%s nab."),
+    "gui.donbass.workbench.unit.seconds": ("%s s", "%s с", "%s s"),
+    "gui.donbass.workbench.unit.rpm": ("%s rpm", "%s в/мин", "%s/min"),
+    "gui.donbass.workbench.unit.degrees": ("%s°", "%s°", "%s°"),
+    "gui.donbass.workbench.mod.magazine": ("Extended magazine", "Увеличенный магазин", "Powiększony magazynek"),
+    "gui.donbass.workbench.mod.mechanism": ("Improved mechanism", "Улучшенный механизм", "Ulepszony mechanizm"),
+    "gui.donbass.workbench.mod.stabilizer": ("Stabilizer", "Стабилизатор", "Stabilizator"),
+    "gui.donbass.workbench.mod.barrel": ("Reinforced barrel", "Усиленный ствол", "Wzmocniona lufa"),
+    "gui.donbass.workbench.mod.spring": ("Improved spring", "Улучшенная пружина", "Ulepszona sprężyna"),
+    "gui.donbass.workbench.chip.magazine": ("Mag", "Маг", "Mag"),
+    "gui.donbass.workbench.chip.mechanism": ("Mec", "Мех", "Mec"),
+    "gui.donbass.workbench.chip.stabilizer": ("Stb", "Стб", "Stb"),
+    "gui.donbass.workbench.chip.barrel": ("Brl", "Ств", "Luf"),
+    "gui.donbass.workbench.chip.spring": ("Spr", "Пру", "Spr"),
+    "message.donbass.workbench_installed": ("Installed: %s", "Установлено: %s", "Zainstalowano: %s"),
 })

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "donbass:block/weapon_workbench_top",
+    "side": "donbass:block/weapon_workbench_side",
+    "bottom": "donbass:block/mine_concrete"
+  }
+}

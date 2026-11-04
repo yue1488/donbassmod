@@ -138,10 +138,11 @@ def gen_biomes():
     canyon["config"]["shape"]["thickness"]["value"] = {"max": 5.0, "min": 0.0, "plateau": 1.0}
     wj(os.path.join(WG, "configured_carver", "balka_canyon.json"), canyon)
 
-    # Structures spawn in the Donbass biomes and in steppe-like Overworld biomes.
-    both = [N + "steppe", N + "balka", "minecraft:plains", "minecraft:sunflower_plains",
-            "minecraft:savanna", "minecraft:meadow"]
-    wj(os.path.join(DATA, "tags", "worldgen", "biome", "has_structures.json"), {"values": both})
+    # Structures spawn ONLY in the Donbass dimension's own biomes.  (0.2.x also listed plains, sunflower plains,
+    # savanna and meadow here, so the settlements, mines and checkpoints appeared in the ordinary Overworld too -
+    # fixed in 0.3.1; tools/validate.py now fails if a vanilla biome gets into this tag again.)
+    only_donbass = [N + "steppe", N + "balka"]
+    wj(os.path.join(DATA, "tags", "worldgen", "biome", "has_structures.json"), {"values": only_donbass})
     # Coal seams and anthracite also appear in every ordinary Overworld biome (Forge biome modifier).
     wj(os.path.join(DATA, "forge", "biome_modifier", "overworld_coal.json"), {
         "type": "forge:add_features", "biomes": "#minecraft:is_overworld", "step": "underground_ores",
@@ -307,6 +308,20 @@ def gen_loot():
                     it(d("rifle_magazine"), 2), it("golden_apple", 1), it(d("miners_token"), 4, 1, 3)]),
         ],
     }
+    # ---- 0.3.0: AK modification kits.  One separate pool per chest (1 roll, mostly empty) so that the kits neither
+    #      dilute nor replace the rest of the loot.  The more useful a kit, the rarer: barrel (-10 % spread) and
+    #      spring (+10 % fire rate) are the most common, then the stabilizer (-20 % spread), then the improved
+    #      reload mechanism (-20 % reload time) and the extended magazine (+50 % capacity) is the rarest.
+    #      tools/validate.py checks this ordering.
+    KIT_WEIGHT = {"barrel": 4, "spring": 4, "stabilizer": 3, "mechanism": 2, "magazine": 1}
+
+    def kit_pool(empty_weight, kinds=("barrel", "spring", "stabilizer", "mechanism", "magazine")):
+        return (1, 1, [it(d("ak_mod_" + k), KIT_WEIGHT[k]) for k in kinds] + [empty(empty_weight)])
+
+    tables["factory"].append(kit_pool(36))                                       # 14/50 = 28 % per chest
+    tables["mine_deep"].append(kit_pool(47, ("barrel", "spring", "stabilizer", "mechanism")))      # 13/60
+    tables["freight_station"].append(kit_pool(49, ("barrel", "spring", "stabilizer")))             # 11/60
+    tables["blockpost_supply"].append(kit_pool(46))                              # 14/60 = 23 %
     for faction, prefix in (("north", "steppe"), ("south", "terricone")):
         tables[f"blockpost_armory_{faction}"] = [
             # at most two pieces of the squad's own uniform per chest, never the whole set
@@ -316,6 +331,7 @@ def gen_loot():
             (2, 3, [it(d("rifle_cartridge"), 12, 6, 16), it(d("rifle_magazine"), 4), it(d("gun_parts"), 3, 1, 2),
                     it("iron_ingot", 5, 1, 3), it("cooked_beef", 4, 1, 3), it(d("coal_plate"), 2, 1, 2),
                     it(d("miners_token"), 3, 1, 3), it("tnt", 1)]),
+            kit_pool(26),                                                        # 14/40 = 35 % per armoury chest
         ]
     for name, pools in tables.items():
         wj(os.path.join(DATA, "loot_tables", "chests", name + ".json"), {

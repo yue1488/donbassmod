@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "GGG",
+    "PTP",
+    "I I"
+  ],
+  "key": {
+    "G": {
+      "item": "donbass:steel_girder"
+    },
+    "P": {
+      "item": "donbass:gun_parts"
+    },
+    "T": {
+      "item": "minecraft:crafting_table"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "item": "donbass:weapon_workbench",
+    "count": 1
+  }
+}

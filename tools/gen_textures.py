@@ -730,6 +730,8 @@ def main():
     print(f"textures: {len(BLOCK_TEXTURES)} block, {len(ITEM_TEXTURES)} item")
     import gen_textures_gear
     gen_textures_gear.main()
+    import gen_textures_mods
+    gen_textures_mods.main()
 
 
 if __name__ == "__main__":

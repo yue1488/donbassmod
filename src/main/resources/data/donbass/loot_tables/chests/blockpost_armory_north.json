@@ -170,6 +170,45 @@
           "weight": 1
         }
       ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1.0,
+        "max": 1.0
+      },
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "donbass:ak_mod_barrel",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "donbass:ak_mod_spring",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "donbass:ak_mod_stabilizer",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "donbass:ak_mod_mechanism",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "donbass:ak_mod_magazine",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 26
+        }
+      ]
     }
   ]
 }

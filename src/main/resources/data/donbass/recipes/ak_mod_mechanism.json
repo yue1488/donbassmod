@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "donbass:gun_parts"
+    },
+    {
+      "item": "donbass:gun_parts"
+    },
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "item": "donbass:rusty_gear"
+    }
+  ],
+  "result": {
+    "item": "donbass:ak_mod_mechanism",
+    "count": 1
+  }
+}

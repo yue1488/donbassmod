@@ -53,7 +53,7 @@ VWG = refj("vanilla_worldgen_names_1.20.1.json")
 BOOL = ["true", "false"]
 FACING4 = ["north", "south", "west", "east"]
 KIND_PROPS = {
-    "cube": {}, "falling": {}, "magma": {}, "glass": {},
+    "cube": {}, "falling": {}, "magma": {}, "glass": {}, "workbench": {},
     "pillar": {"axis": ["x", "y", "z"]},
     "slab": {"type": ["top", "bottom", "double"], "waterlogged": BOOL},
     "stairs": {"facing": FACING4, "half": ["top", "bottom"],
@@ -718,10 +718,187 @@ def check_boss():
     print("  boss: phase lock / damage rules / game tests checked")
 
 
+def check_ak_mods():
+    """0.3.0: the weapon workbench and the five AK modifications.  Guards against 'fake' bonuses (an effect that is
+    documented but not wired into the rifle), against changes of the bullet damage, against a mod resetting the
+    loaded ammo, and checks that every piece (item, texture, recipe, lang, loot, registration) exists."""
+    mod_dir = os.path.join(JAVA, "com", "donbass", "mod")
+
+    def src(rel):
+        path = os.path.join(mod_dir, rel)
+        if not os.path.exists(path):
+            err(f"{rel} is missing")
+            return ""
+        return re.sub(r"//[^\n]*|/\*.*?\*/", " ", open(path, encoding="utf-8").read(), flags=re.S)
+
+    mods = src("item/AkMods.java")
+    rifle = src("item/AkRifleItem.java")
+    client = src("client/AkClientExtensions.java")
+
+    # -- the enum, the items and the constants of the spec
+    enum_ids = re.findall(r'\b([A-Z]+)\("([a-z]+)"\)', mods)
+    consts = {name: id_ for name, id_ in enum_ids}
+    if set(consts) != {"MAGAZINE", "MECHANISM", "STABILIZER", "BARREL", "SPRING"}:
+        err(f"AkMods.Mod: expected the five kinds, found {sorted(consts)}")
+    spec = {"MAGAZINE_FACTOR": "1.5", "RELOAD_FACTOR": "0.8", "STABILIZER_SPREAD_FACTOR": "0.8",
+            "BARREL_SPREAD_FACTOR": "0.9", "SPRING_RATE_FACTOR": "1.1"}
+    for name, value in spec.items():
+        m = re.search(r"\b" + name + r"\s*=\s*([0-9.]+)D", mods)
+        if not m or float(m.group(1)) != float(value):
+            err(f"AkMods.{name} must be {value} (the values of the 0.3.0 specification)")
+    if re.search(r"rifleDamage|damage", mods, re.I):
+        err("AkMods must not touch the bullet damage (the reinforced barrel changes only the spread)")
+    if re.search(r"TAG_AMMO|setAmmo|\"Ammo\"", mods):
+        err("AkMods must not touch the loaded ammo: installing a mod keeps the rounds in the magazine")
+    kits = [i for i in ITEMS if i["kind"] == "akmod"]
+    if sorted(i["mod"] for i in kits) != sorted(consts):
+        err(f"akmod items {sorted(i['mod'] for i in kits)} do not match AkMods.Mod {sorted(consts)}")
+
+    # -- the rifle must get EVERY number through AkMods (otherwise a mod would be a fake bonus)
+    for fn in ("rifleMagazine", "rifleReloadTicks", "rifleSpread", "rifleFireInterval"):
+        for name, text in (("AkRifleItem", rifle), ("AkClientExtensions", client)):
+            if "DonbassConfig." + fn in text:
+                err(f"{name} reads DonbassConfig.{fn}() directly: use AkMods so the modification applies")
+    for needle in ("AkMods.magazineSize(stack)", "AkMods.reloadTicks(stack)", "AkMods.spread(stack)",
+                   "AkMods.fireInterval(stack)", "AkMods.isShotTick("):
+        if needle not in rifle:
+            err(f"AkRifleItem does not use {needle}")
+    if "AkMods.reloadTicks" not in client:
+        err("AkClientExtensions: the reload animation must use AkMods.reloadTicks(stack)")
+    if "DonbassConfig.rifleDamage()" not in rifle:
+        err("AkRifleItem: the bullet damage must still come from DonbassConfig.rifleDamage()")
+
+    # -- every kit: texture, recipe, lang (item name, effect, GUI names), model
+    langs = {c: load(os.path.join(ASSETS, "lang", c + ".json")) or {} for c in ("en_us", "ru_ru", "pl_pl")}
+    for kit in kits:
+        i, mod_id = kit["id"], consts.get(kit["mod"], "?")
+        if not os.path.exists(os.path.join(ASSETS, "textures", "item", i + ".png")):
+            err(f"{i}: texture is missing")
+        if i not in RECIPES:
+            err(f"{i}: no crafting recipe")
+        keys = [f"item.donbass.{i}", f"tooltip.donbass.ak_mod_{mod_id}", f"gui.donbass.workbench.mod.{mod_id}",
+                f"gui.donbass.workbench.chip.{mod_id}"]
+        for code, d in langs.items():
+            for k in keys:
+                if k not in d:
+                    err(f"lang {code}: missing {k}")
+    if "weapon_workbench" not in RECIPES:
+        err("weapon_workbench: no crafting recipe")
+    else:
+        ing = json.dumps(RECIPES["weapon_workbench"])
+        if "donbass:" not in ing.replace('"result"', "") or "minecraft:" not in ing:
+            err("weapon_workbench recipe must combine the mod's industrial items with vanilla ones")
+    for tex in ("weapon_workbench_top", "weapon_workbench_side"):
+        if not os.path.exists(os.path.join(ASSETS, "textures", "block", tex + ".png")):
+            err(f"{tex}: block texture is missing")
+
+    # -- every translation key used by the new Java code exists in every language
+    used = set()
+    for rel in ("item/AkModItem.java", "item/AkRifleItem.java", "menu/WorkbenchMenu.java",
+                "client/WorkbenchScreen.java", "block/WeaponWorkbenchBlockEntity.java"):
+        used |= set(re.findall(r'translatable\(\s*"([a-z_.]+)"', src(rel)))
+    for code, d in langs.items():
+        for k in sorted(used):
+            if k not in d:
+                err(f"lang {code}: the Java code uses the key {k} which does not exist")
+
+    # -- the workbench: the block is visible, has a block entity that saves, drops its items, opens the menu
+    block = src("block/WeaponWorkbenchBlock.java")
+    be = src("block/WeaponWorkbenchBlockEntity.java")
+    menu = src("menu/WorkbenchMenu.java")
+    screen = src("client/WorkbenchScreen.java")
+    if not re.search(r"getRenderShape[^{]*\{\s*return\s+RenderShape\.MODEL", block):
+        err("WeaponWorkbenchBlock: getRenderShape() must return RenderShape.MODEL (a BaseEntityBlock is invisible otherwise)")
+    for needle in ("NetworkHooks.openScreen", "dropContents", "onRemove"):
+        if needle not in block:
+            err(f"WeaponWorkbenchBlock: expected {needle}")
+    for needle in ("saveAdditional", "void load(", "serializeNBT", "deserializeNBT", "getSlotLimit", "isItemValid",
+                   "dropContents"):
+        if needle not in be:
+            err(f"WeaponWorkbenchBlockEntity: expected {needle}")
+    for needle in ("clickMenuButton", "quickMoveStack", "stillValid", "AkMods.install", "ContainerData",
+                   "bench.setStackInSlot(slot, ItemStack.EMPTY)"):
+        if needle not in menu:
+            err(f"WorkbenchMenu: expected {needle}")
+    if menu.count("AkMods.install") != 1 or "ItemStack.EMPTY" not in menu:
+        err("WorkbenchMenu: a kit must be consumed exactly where the mod is installed")
+    if "handleInventoryButtonClick" not in screen:
+        err("WorkbenchScreen: the Install button must send a menu button click to the server")
+    main_src = src("DonbassMod.java")
+    for needle in ("ModBlockEntities.BLOCK_ENTITIES.register", "ModMenus.MENUS.register"):
+        if needle not in main_src:
+            err(f"DonbassMod: {needle} is missing")
+    if "MenuScreens.register(ModMenus.WORKBENCH.get()" not in src("client/ClientSetup.java"):
+        err("ClientSetup: the workbench screen is not registered")
+
+    # -- loot: the more useful, the rarer (barrel >= spring >= stabilizer >= mechanism >= magazine per chest)
+    order = ["barrel", "spring", "stabilizer", "mechanism", "magazine"]
+    total = {k: 0 for k in order}
+    tables_with_kits = 0
+    for p in glob.glob(os.path.join(DATA, "loot_tables", "chests", "*.json")):
+        d = load(p) or {"pools": []}
+        weights = {k: 0 for k in order}
+        for pool in d["pools"]:
+            for e in pool["entries"]:
+                m = re.fullmatch(r"donbass:ak_mod_([a-z]+)", e.get("name", ""))
+                if m and m.group(1) in weights:
+                    weights[m.group(1)] += e.get("weight", 1)
+        if not any(weights.values()):
+            continue
+        tables_with_kits += 1
+        name = os.path.basename(p)
+        for a, b in zip(order, order[1:]):
+            if weights[a] < weights[b]:
+                err(f"loot {name}: ak_mod_{b} ({weights[b]}) is more common than the less useful ak_mod_{a} ({weights[a]})")
+        for k in order:
+            total[k] += weights[k]
+    if tables_with_kits < 4:
+        err(f"the kits appear in only {tables_with_kits} chest tables (factories, blockposts and mines/stations expected)")
+    if not total["magazine"] < total["barrel"]:
+        err("loot: the extended magazine must be strictly rarer than the barrel")
+    for loot_name in ("factory", "blockpost_armory_north", "blockpost_armory_south", "blockpost_supply"):
+        if not os.path.exists(os.path.join(DATA, "loot_tables", "chests", loot_name + ".json")):
+            err(f"loot table {loot_name} is missing")
+    print(f"  ak mods: 5 kinds, workbench, {tables_with_kits} loot tables with kits, effects wired through AkMods")
+
+
+def check_structure_biomes():
+    """0.3.1: the structures of the Donbass dimension must not generate in the ordinary Overworld.  The cause of the
+    old bug: the biome tag that every structure points at also listed vanilla biomes (plains, savanna, meadow...)."""
+    tag_path = os.path.join(DATA, "tags", "worldgen", "biome", "has_structures.json")
+    tag = load(tag_path) or {"values": []}
+    own = {"donbass:" + os.path.splitext(os.path.basename(p))[0]
+           for p in glob.glob(os.path.join(DATA, "worldgen", "biome", "*.json"))}
+    for value in tag["values"]:
+        if value not in own:
+            err(f"tags/worldgen/biome/has_structures.json lists {value}: structures would generate outside the "
+                "Donbass dimension's own biomes (the Overworld structure bug)")
+    if not tag["values"]:
+        err("tags/worldgen/biome/has_structures.json is empty: the structures could not generate anywhere")
+    # the dimension itself must use only those biomes, otherwise the tag would not cover it
+    dim = load(os.path.join(DATA, "dimension", "donbass.json")) or {}
+    used = {e["biome"] for e in dim.get("generator", {}).get("biome_source", {}).get("biomes", [])}
+    if used != set(tag["values"]):
+        err(f"dimension biomes {sorted(used)} differ from has_structures {sorted(tag['values'])}")
+    count = 0
+    for p in glob.glob(os.path.join(DATA, "worldgen", "structure", "*.json")):
+        d = load(p) or {}
+        count += 1
+        biomes = d.get("biomes")
+        if biomes != "#donbass:has_structures":
+            err(f"structure {os.path.basename(p)}: biomes must be '#donbass:has_structures', is {biomes!r}")
+    # no Forge biome modifier may add structures/spawns of the mod to vanilla biomes
+    for p in glob.glob(os.path.join(DATA, "forge", "biome_modifier", "*.json")):
+        d = load(p) or {}
+        if d.get("type") in ("forge:add_spawns",) or "structure" in json.dumps(d):
+            err(f"biome modifier {os.path.basename(p)} adds spawns/structures to other biomes")
+    print(f"  structure biomes: {count} structures are limited to {sorted(tag['values'])}")
+
+
 def main():
     print("Validating Donbass mod...")
     for fn in (check_templates, check_sounds_and_gear, check_assets, check_lang, check_recipes_and_loot,
-               check_rifle_model, check_worldgen, check_java, check_java_imports, check_boss):
+               check_rifle_model, check_worldgen, check_java, check_java_imports, check_boss, check_ak_mods, check_structure_biomes):
         fn()
     for w in warnings:
         print("  warning:", w)

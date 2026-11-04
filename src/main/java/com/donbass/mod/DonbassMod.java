@@ -1,11 +1,13 @@
 package com.donbass.mod;
 
 import com.donbass.mod.config.DonbassConfig;
+import com.donbass.mod.registry.ModBlockEntities;
 import com.donbass.mod.registry.ModBlocks;
 import com.donbass.mod.registry.ModCreativeTabs;
 import com.donbass.mod.registry.ModEntities;
 import com.donbass.mod.registry.ModFeatures;
 import com.donbass.mod.registry.ModItems;
+import com.donbass.mod.registry.ModMenus;
 import com.donbass.mod.registry.ModSounds;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -23,6 +25,8 @@ public class DonbassMod {
         // Blocks first: ModBlocks also queues the matching BlockItems into ModItems.ITEMS.
         ModBlocks.BLOCKS.register(modBus);
         ModItems.ITEMS.register(modBus);
+        ModBlockEntities.BLOCK_ENTITIES.register(modBus);
+        ModMenus.MENUS.register(modBus);
         ModSounds.SOUNDS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModFeatures.FEATURES.register(modBus);

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "donbass:rifle_magazine"
+    },
+    {
+      "item": "donbass:gun_parts"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
+  "result": {
+    "item": "donbass:ak_mod_magazine",
+    "count": 1
+  }
+}

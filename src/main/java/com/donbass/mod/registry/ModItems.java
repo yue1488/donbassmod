@@ -4,6 +4,8 @@
 package com.donbass.mod.registry;
 
 import com.donbass.mod.DonbassMod;
+import com.donbass.mod.item.AkModItem;
+import com.donbass.mod.item.AkMods;
 import com.donbass.mod.item.AkRifleItem;
 import com.donbass.mod.item.CombineSirenItem;
 import com.donbass.mod.item.DonbassArmorItem;
@@ -56,6 +58,16 @@ public final class ModItems {
             ITEMS.register("coal_plate", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> AK_RIFLE =
             ITEMS.register("ak_rifle", () -> new AkRifleItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> AK_MOD_MAGAZINE =
+            ITEMS.register("ak_mod_magazine", () -> new AkModItem(new Item.Properties().stacksTo(16), AkMods.Mod.MAGAZINE));
+    public static final RegistryObject<Item> AK_MOD_MECHANISM =
+            ITEMS.register("ak_mod_mechanism", () -> new AkModItem(new Item.Properties().stacksTo(16), AkMods.Mod.MECHANISM));
+    public static final RegistryObject<Item> AK_MOD_STABILIZER =
+            ITEMS.register("ak_mod_stabilizer", () -> new AkModItem(new Item.Properties().stacksTo(16), AkMods.Mod.STABILIZER));
+    public static final RegistryObject<Item> AK_MOD_BARREL =
+            ITEMS.register("ak_mod_barrel", () -> new AkModItem(new Item.Properties().stacksTo(16), AkMods.Mod.BARREL));
+    public static final RegistryObject<Item> AK_MOD_SPRING =
+            ITEMS.register("ak_mod_spring", () -> new AkModItem(new Item.Properties().stacksTo(16), AkMods.Mod.SPRING));
     public static final RegistryObject<Item> MINERS_HELMET =
             ITEMS.register("miners_helmet", () -> new DonbassArmorItem(ModArmorMaterials.MINERS, ArmorItem.Type.HELMET, new Item.Properties()));
     public static final RegistryObject<Item> MINERS_JACKET =

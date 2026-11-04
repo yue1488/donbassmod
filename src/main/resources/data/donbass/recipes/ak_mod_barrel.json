@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "donbass:coal_plate"
+    },
+    {
+      "item": "donbass:coal_plate"
+    },
+    {
+      "item": "donbass:steel_girder"
+    },
+    {
+      "item": "donbass:gun_parts"
+    }
+  ],
+  "result": {
+    "item": "donbass:ak_mod_barrel",
+    "count": 1
+  }
+}

@@ -4,6 +4,7 @@
 package com.donbass.mod.registry;
 
 import com.donbass.mod.DonbassMod;
+import com.donbass.mod.block.WeaponWorkbenchBlock;
 import java.util.function.Supplier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -116,4 +117,6 @@ public final class ModBlocks {
             register("rail_sleepers", () -> new RotatedPillarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(2.0F, 3.0F).sound(SoundType.WOOD)));
     public static final RegistryObject<Block> FREIGHT_WAGON_PLATING =
             register("freight_wagon_plating", () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_RED).strength(3.0F, 9.0F).sound(SoundType.METAL).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> WEAPON_WORKBENCH =
+            register("weapon_workbench", () -> new WeaponWorkbenchBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops()));
 }

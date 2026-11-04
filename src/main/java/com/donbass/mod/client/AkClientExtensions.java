@@ -1,6 +1,6 @@
 package com.donbass.mod.client;
 
-import com.donbass.mod.config.DonbassConfig;
+import com.donbass.mod.item.AkMods;
 import com.donbass.mod.item.AkRifleItem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -45,7 +45,7 @@ public class AkClientExtensions implements IClientItemExtensions {
         poseStack.mulPose(Axis.XP.rotationDegrees(recoil * 3.5F));
 
         if (AkRifleItem.isReloading(stack) && Minecraft.getInstance().level != null) {
-            float total = Math.max(1, DonbassConfig.rifleReloadTicks());
+            float total = Math.max(1, AkMods.reloadTicks(stack));
             float left = AkRifleItem.getReloadEnd(stack) - (Minecraft.getInstance().level.getGameTime() + partialTick);
             float progress = Mth.clamp(1.0F - left / total, 0.0F, 1.0F);
             float dip = Mth.sin(progress * (float) Math.PI);             // down and back up

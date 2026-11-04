@@ -7,6 +7,7 @@ import com.donbass.mod.config.DonbassConfig;
 import com.donbass.mod.registry.ModItems;
 import com.donbass.mod.registry.ModSounds;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -63,6 +64,14 @@ public class AkRifleItem extends Item {
     public static long getReloadEnd(ItemStack stack) {
         CompoundTag tag = stack.getTag();
         return tag == null ? 0L : tag.getLong(TAG_RELOAD_END);
+    }
+
+    /** Drops a reload in progress (the loaded rounds stay as they are). */
+    public static void cancelReload(ItemStack stack) {
+        CompoundTag tag = stack.getTag();
+        if (tag != null) {
+            tag.remove(TAG_RELOAD_END);
+        }
     }
 
     private static int countCartridges(Player player) {
@@ -141,9 +150,9 @@ public class AkRifleItem extends Item {
         if (!(entity instanceof Player player)) {
             return;
         }
-        int interval = DonbassConfig.rifleFireInterval();
+        double interval = AkMods.fireInterval(stack);
         int used = getUseDuration(stack) - remainingUseDuration;
-        if (used % interval != 0 || isReloading(stack)) {
+        if (!AkMods.isShotTick(interval, used) || isReloading(stack)) {
             return;
         }
         boolean creative = player.getAbilities().instabuild;
@@ -168,7 +177,7 @@ public class AkRifleItem extends Item {
         if (!creative) {
             setAmmo(stack, getAmmo(stack) - 1);
         }
-        double spread = DonbassConfig.rifleSpread() * (player.isShiftKeyDown() ? 0.5D : 1.0D);
+        double spread = AkMods.spread(stack) * (player.isShiftKeyDown() ? 0.5D : 1.0D);
         if (player.getDeltaMovement().horizontalDistanceSqr() > 0.01D) {
             spread *= 1.6D;
         }
@@ -190,7 +199,7 @@ public class AkRifleItem extends Item {
 
     // ----------------------------------------------------------- reload ----
     public static void startReload(Level level, Player player, ItemStack stack, boolean manual) {
-        int max = DonbassConfig.rifleMagazine();
+        int max = AkMods.magazineSize(stack);
         boolean creative = player.getAbilities().instabuild;
         if (getAmmo(stack) >= max) {
             if (manual) {
@@ -202,13 +211,13 @@ public class AkRifleItem extends Item {
             player.displayClientMessage(Component.translatable("message.donbass.rifle_no_ammo"), true);
             return;
         }
-        stack.getOrCreateTag().putLong(TAG_RELOAD_END, level.getGameTime() + DonbassConfig.rifleReloadTicks());
+        stack.getOrCreateTag().putLong(TAG_RELOAD_END, level.getGameTime() + AkMods.reloadTicks(stack));
         level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.AK_RELOAD.get(),
                 SoundSource.PLAYERS, 0.9F, 1.0F);
     }
 
     private static void finishReload(Player player, ItemStack stack) {
-        int max = DonbassConfig.rifleMagazine();
+        int max = AkMods.magazineSize(stack);
         int missing = Math.max(0, max - getAmmo(stack));
         int loaded = player.getAbilities().instabuild ? missing : takeCartridges(player, missing);
         setAmmo(stack, getAmmo(stack) + loaded);
@@ -253,8 +262,16 @@ public class AkRifleItem extends Item {
     // ----------------------------------------------------------- client ----
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("tooltip.donbass.rifle_ammo", getAmmo(stack), DonbassConfig.rifleMagazine())
+        tooltip.add(Component.translatable("tooltip.donbass.rifle_ammo", getAmmo(stack), AkMods.magazineSize(stack))
                 .withStyle(ChatFormatting.GRAY));
+        Set<AkMods.Mod> mods = AkMods.get(stack);
+        if (!mods.isEmpty()) {
+            tooltip.add(Component.translatable("tooltip.donbass.rifle_mods").withStyle(ChatFormatting.GRAY));
+            for (AkMods.Mod mod : mods) {
+                tooltip.add(Component.literal(" ").append(Component.translatable(mod.nameKey()))
+                        .withStyle(ChatFormatting.GREEN));
+            }
+        }
         if (isReloading(stack)) {
             tooltip.add(Component.translatable("tooltip.donbass.rifle_reloading").withStyle(ChatFormatting.YELLOW));
         }

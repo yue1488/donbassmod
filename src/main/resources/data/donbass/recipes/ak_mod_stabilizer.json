@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "donbass:steel_girder"
+    },
+    {
+      "item": "donbass:gun_parts"
+    },
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
+  "result": {
+    "item": "donbass:ak_mod_stabilizer",
+    "count": 1
+  }
+}
