@@ -151,14 +151,17 @@ def main():
     jigsaw_structure("administration", "industry/administration", 1, 1, 48, "beard_thin")
 
     # ---- structure sets (spacing / separation are in chunks)
-    structure_set("miners_settlements", 1730101, 16, 6, [("miners_settlement", 1)])
+    # 0.4.0 rebalance: settlements a little rarer (spacing 16 -> 17: about -11 % of the candidates), checkpoints a little
+    # more frequent (spacing 14 -> 13: about +16 %).  Separation and salt stay: only the density changes.  The mine sets
+    # below are NOT touched (see tools/sim_structure_frequency.py for the numbers, validate.py check_structure_rebalance).
+    structure_set("miners_settlements", 1730101, 17, 6, [("miners_settlement", 1)])
     structure_set("shallow_mines", 1730102, 10, 4, [("shallow_mine", 1)])
     structure_set("active_mines", 1730103, 20, 7, [("active_mine", 1)], exclusion=("miners_settlements", 3))
     structure_set("deep_mines", 1730104, 24, 8, [("deep_mine", 1)], exclusion=("miners_settlements", 3))
     structure_set("industrial_plants", 1730105, 18, 6, [("steelworks", 1), ("coke_plant", 1)],
                   exclusion=("miners_settlements", 4))
     structure_set("freight_stations", 1730106, 22, 7, [("freight_station", 1)], exclusion=("miners_settlements", 4))
-    structure_set("blockposts", 1730107, 14, 5, [("blockpost_north", 1), ("blockpost_south", 1)],
+    structure_set("blockposts", 1730107, 13, 5, [("blockpost_north", 1), ("blockpost_south", 1)],
                   exclusion=("miners_settlements", 3))
 
     structure_set("administrations", 1730108, 36, 14, [("administration", 1)], exclusion=("miners_settlements", 4))

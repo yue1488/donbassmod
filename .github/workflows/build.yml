@@ -16,6 +16,8 @@ jobs:
           java-version: '17'
       - name: Validate content (JSON, structures, references)
         run: python3 tools/validate.py
+      - name: Self-check the pure-Java logic (boss health multiplier)
+        run: sh tools/run_selfchecks.sh
       - name: Build (jar is reobfuscated by reobfJar)
         run: |
           chmod +x gradlew

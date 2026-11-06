@@ -2,7 +2,7 @@
   "placement": {
     "type": "minecraft:random_spread",
     "salt": 1730107,
-    "spacing": 14,
+    "spacing": 13,
     "separation": 5,
     "exclusion_zone": {
       "other_set": "donbass:miners_settlements",

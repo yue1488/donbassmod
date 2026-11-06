@@ -2,8 +2,14 @@
 
 Layout (x east, z south; y = 1 is the ground layer, the yard lands on the terrain surface):
   perimeter wall with a gate in the south side, barracks (north-west), covered stores (south-west),
-  campfire with seats in the middle, signal pole, watchtower (south-east corner, ladder inside).
-The squad only changes colours and the loot tables of the chests.
+  campfire with seats in the middle, flag pole, watchtower (south-east corner, ladder inside).
+The squad only changes colours, the flag and the loot tables of the chests.
+
+Flags (0.4.0): the checkpoint of the DPR squad ("north", steppe uniform, "Ополченец ДНР") flies the DPR flag, the one of the
+LPR squad ("south", terricone uniform, "Ополченец ЛНР") the LPR flag - one flag per checkpoint, never both.  A flag is
+four wool blocks wide and three high, built into the template (so it is generated together with the structure), on a
+12-block girder pole that is much taller than the walls (the walls are 2 high, the tower 9) and therefore visible from
+afar.  Stripes top to bottom: DPR black / blue / red, LPR light blue / blue / red (both 2:3 horizontal tricolours).
 """
 import random
 import zlib
@@ -16,15 +22,22 @@ SIZE = 17
 H = 14
 G = 1
 
+# the flags, stripes from the top down (plain wool blocks; no mechanics)
+FLAG_DPR = ("minecraft:black_wool", "minecraft:blue_wool", "minecraft:red_wool")
+FLAG_LPR = ("minecraft:light_blue_wool", "minecraft:blue_wool", "minecraft:red_wool")
+# the pole stands in the yard (x = 11, z = 4); the flag hangs east of it, its top row is the top row of the template
+POLE_X, POLE_Z = 11, 4
+FLAG_X0, FLAG_X1 = POLE_X + 1, POLE_X + 4
+
 SQUADS = {
-    # faction id -> (pennant wool, bed colour, wall block)
-    "north": ("minecraft:white_wool", "gray", M + "whitewashed_wall"),
-    "south": ("minecraft:orange_wool", "orange", M + "sooty_bricks"),
+    # faction id -> (flag stripes top to bottom, bed colour, wall block)
+    "north": (FLAG_DPR, "gray", M + "whitewashed_wall"),
+    "south": (FLAG_LPR, "orange", M + "sooty_bricks"),
 }
 
 
 def build(faction):
-    wool, bed_color, wall = SQUADS[faction]
+    flag, bed_color, wall = SQUADS[faction]
     rng = random.Random(zlib.crc32(("blockpost_" + faction).encode()))
     t = Tpl(SIZE, H, SIZE)
 
@@ -87,9 +100,13 @@ def build(faction):
     t.stairs(9, 2, 9, "minecraft:spruce_stairs", "west")
     t.stairs(8, 2, 10, "minecraft:spruce_stairs", "north")
 
-    # ---- signal pole with a plain two-colour-free pennant (the squad's wool colour only)
-    t.pillar(11, 2, 9, 4, M + "steel_girder")
-    t.fill(12, 8, 4, 14, 9, 4, wool)
+    # ---- flag pole with the flag of the squad's republic: the girder pole stands on the yard layer (y = 1) and every
+    #      flag block touches the pole or the stripe next to it, so nothing floats and nothing is inside a wall
+    top = H - 1
+    t.pillar(POLE_X, 2, top, POLE_Z, M + "steel_girder")
+    for row, stripe in enumerate(flag):
+        y = top - row
+        t.fill(FLAG_X0, y, POLE_Z, FLAG_X1, y, POLE_Z, stripe)
 
     # ---- watchtower (x 12..15, z 12..15): hollow ring, floor at y = 8, ladder inside, parapet with crenels
     t.walls(12, 2, 12, 15, 10, 15, M + "slag_bricks")

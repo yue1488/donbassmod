@@ -184,15 +184,15 @@ ARMOR_SETS = {   # mat -> list of (id, names, slot)
         ("coal_leggings", ("Coal Leggings", "Угольные поножи", "Nagolenniki węglowe"), LEGS),
         ("coal_boots", ("Coal Boots", "Угольные ботинки", "Buty węglowe"), BOOTS)],
     "STEPPE": [
-        ("steppe_helmet", ("Steppe Field Helmet", "Каска «Степь»", "Hełm polowy „Step”"), HELMET),
-        ("steppe_jacket", ("Steppe Field Jacket", "Куртка «Степь»", "Kurtka polowa „Step”"), CHEST),
-        ("steppe_trousers", ("Steppe Field Trousers", "Штаны «Степь»", "Spodnie polowe „Step”"), LEGS),
-        ("steppe_boots", ("Steppe Combat Boots", "Ботинки «Степь»", "Buty bojowe „Step”"), BOOTS)],
+        ("steppe_helmet", ("DPR Military Uniform Helmet", "Каска военной формы ДНР", "Hełm munduru wojskowego DRL"), HELMET),
+        ("steppe_jacket", ("DPR Military Uniform Jacket", "Куртка военной формы ДНР", "Kurtka munduru wojskowego DRL"), CHEST),
+        ("steppe_trousers", ("DPR Military Uniform Trousers", "Штаны военной формы ДНР", "Spodnie munduru wojskowego DRL"), LEGS),
+        ("steppe_boots", ("DPR Military Uniform Boots", "Ботинки военной формы ДНР", "Buty munduru wojskowego DRL"), BOOTS)],
     "TERRICONE": [
-        ("terricone_helmet", ("Terricone Field Helmet", "Каска «Терикон»", "Hełm polowy „Hałda”"), HELMET),
-        ("terricone_jacket", ("Terricone Field Jacket", "Куртка «Терикон»", "Kurtka polowa „Hałda”"), CHEST),
-        ("terricone_trousers", ("Terricone Field Trousers", "Штаны «Терикон»", "Spodnie polowe „Hałda”"), LEGS),
-        ("terricone_boots", ("Terricone Combat Boots", "Ботинки «Терикон»", "Buty bojowe „Hałda”"), BOOTS)],
+        ("terricone_helmet", ("LPR Military Uniform Helmet", "Каска военной формы ЛНР", "Hełm munduru wojskowego ŁRL"), HELMET),
+        ("terricone_jacket", ("LPR Military Uniform Jacket", "Куртка военной формы ЛНР", "Kurtka munduru wojskowego ŁRL"), CHEST),
+        ("terricone_trousers", ("LPR Military Uniform Trousers", "Штаны военной формы ЛНР", "Spodnie munduru wojskowego ŁRL"), LEGS),
+        ("terricone_boots", ("LPR Military Uniform Boots", "Ботинки военной формы ЛНР", "Buty munduru wojskowego ŁRL"), BOOTS)],
 }
 for _mat, _pieces in ARMOR_SETS.items():
     for _id, _names, _slot in _pieces:
@@ -209,10 +209,13 @@ item("south_fighter_spawn_egg", ("LPR Militiaman Spawn Egg", "Яйцо приз�
      kind="egg", entity="SOUTH_FIGHTER", colors=(0x3A3C40, 0xE07B22))
 
 # --- 0.2.0: the boss ("Combine Director", fictional) and what it leaves behind ---------------------------
-item("combine_siren", ("Combine Siren", "Сирена комбината", "Syrena kombinatu"), kind="siren")
-item("director_pickaxe", ("Director's Pickaxe", "Именная кирка директора", "Imienny kilof dyrektora"),
+item("combine_siren", ("Coal Region Chairman's Siren", "Сирена Председателя Угольного края",
+                       "Syrena Przewodniczącego Kraju Węglowego"), kind="siren")
+item("director_pickaxe", ("Coal Region Chairman's Pickaxe", "Именная кирка Председателя Угольного края",
+                          "Imienny kilof Przewodniczącego Kraju Węglowego"),
      kind="pickaxe", tier="DIRECTOR", attack_damage=2, attack_speed=-2.6)
-item("director_badge", ("Director's Badge of Merit", "Директорский знак отличия", "Odznaka zasługi dyrektora"),
+item("director_badge", ("Coal Region Chairman's Badge of Merit", "Знак отличия Председателя Угольного края",
+                        "Odznaka zasługi Przewodniczącego Kraju Węglowego"),
      kind="trophy")
 
 # creative tab / misc keys
@@ -390,8 +393,14 @@ RECIPES.update({
     "steppe_boots": _shapeless([V + "leather_boots", V + "iron_nugget", V + "iron_nugget", V + "green_dye"], D + "steppe_boots"),
     "terricone_helmet": _shapeless([V + "leather_helmet", V + "iron_ingot", V + "black_dye"], D + "terricone_helmet"),
     "terricone_boots": _shapeless([V + "leather_boots", V + "iron_nugget", V + "iron_nugget", V + "black_dye"], D + "terricone_boots"),
-    # the siren that calls the boss: expensive on purpose (the office of the combine director holds one in a chest)
-    "combine_siren": _shaped(["PBP", "GDG", "P P"], {"P": D + "coal_plate", "B": V + "bell", "G": V + "gold_ingot",
+    # the siren that calls the boss (0.4.0: a much more expensive recipe; the administration building still holds one
+    # in a chest).  Only things the player finds or makes in the Donbass before the first fight (never the boss's own
+    # badge or pickaxe): coal plates (deep mines, factories, sergeants; or iron + 2 anthracite + coke), rifle magazines
+    # (checkpoints, factories, fighters; or 7 iron + weapon parts), an anthracite block (9 anthracite from the ore or the
+    # mine chests), weapon parts (fighters, checkpoints, mines; or a rusty gear / 4 iron scrap + iron + redstone),
+    # plus a vanilla bell and a diamond (also in the deep mine chests).  tools/validate.py check_siren_recipe.
+    "combine_siren": _shaped(["PBP", "MAM", "GDG"], {"P": D + "coal_plate", "B": V + "bell", "M": D + "rifle_magazine",
+                                                     "A": D + "anthracite_block", "G": D + "gun_parts",
                                                      "D": V + "diamond"}, D + "combine_siren"),
 })
 
@@ -412,41 +421,42 @@ LANG_EXTRA.update({
                                  "Pełny komplet: odporność na ogień i lawę, lepsza ochrona przed wybuchami"),
     "tooltip.donbass.set_miners": ("Full set: more mining speed underground", "Полный комплект: быстрее копать под землёй",
                                    "Pełny komplet: szybsze kopanie pod ziemią"),
-    "tooltip.donbass.set_field": ("Field uniform: dropped by militiamen and found at checkpoints",
-                                  "Полевая форма: выпадает из ополченцев и лежит на блокпостах",
-                                  "Mundur polowy: wypada z milicjantów i leży na posterunkach"),
+    "tooltip.donbass.set_field": ("Military uniform: dropped by militiamen and found at checkpoints",
+                                  "Военная форма: выпадает из ополченцев и лежит на блокпостах",
+                                  "Mundur wojskowy: wypada z milicjantów i leży na posterunkach"),
     "message.donbass.miner_hostile": ("The miner refuses to trade with you.", "Шахтёр не хочет с вами торговать.",
                                       "Górnik nie chce z tobą handlować."),
     "message.donbass.coal_set_on": ("The coal armour set protects you from fire.", "Угольный комплект защищает вас от огня.",
                                     "Zbroja węglowa chroni cię przed ogniem."),
-    "entity.donbass.combine_director": ("Mr. Terrikonov", "Господин Терриконов", "Pan Terrikonow"),
+    "entity.donbass.combine_director": ("Chairman of the Coal Region", "Председатель Угольного края",
+                                        "Przewodniczący Kraju Węglowego"),
     "boss.donbass.phase1": ("Phase I: The Briefing", "Фаза I: Планёрка", "Faza I: Odprawa"),
     "boss.donbass.phase2": ("Phase II: All Hands", "Фаза II: Аврал", "Faza II: Wszyscy na pokład"),
     "boss.donbass.phase3": ("Phase III: Fire in the Face", "Фаза III: Пожар в забое", "Faza III: Pożar w przodku"),
-    "message.donbass.director_summon": ("The siren wails. Mr. Terrikonov has come to see who is making the noise.",
-                                        "Воет сирена. Господин Терриконов вышел узнать, кто тут шумит.",
-                                        "Syrena wyje. Pan Terrikonow wyszedł sprawdzić, kto tu hałasuje."),
+    "message.donbass.director_summon": ("The siren wails. The Chairman of the Coal Region has come to see who is making the noise.",
+                                        "Воет сирена. Председатель Угольного края вышел узнать, кто тут шумит.",
+                                        "Syrena wyje. Przewodniczący Kraju Węglowego wyszedł sprawdzić, kto tu hałasuje."),
     "message.donbass.director_phase2": ("\"Everyone to the shift! Overtime for the lot of you!\"",
                                         "«Все на смену! Сверхурочные — каждому!»",
                                         "„Wszyscy na zmianę! Nadgodziny dla każdego!”"),
     "message.donbass.director_phase3": ("\"The plan will be met, even over your dead bodies!\"",
                                         "«План будет выполнен — хоть через ваши трупы!»",
                                         "„Plan zostanie wykonany, nawet po waszych trupach!”"),
-    "message.donbass.director_defeated": ("Mr. Terrikonov is down. The shift is over.",
-                                          "Господин Терриконов повержен. Смена окончена.",
-                                          "Pan Terrikonow pokonany. Zmiana skończona."),
-    "message.donbass.siren_busy": ("Mr. Terrikonov is already here, or somebody called him a moment ago.",
-                                   "Господин Терриконов уже здесь — или его только что вызвали.",
-                                   "Pan Terrikonow już tu jest albo ktoś właśnie go wezwał."),
+    "message.donbass.director_defeated": ("The Chairman of the Coal Region is down. The shift is over.",
+                                          "Председатель Угольного края повержен. Смена окончена.",
+                                          "Przewodniczący Kraju Węglowego pokonany. Zmiana skończona."),
+    "message.donbass.siren_busy": ("The Chairman of the Coal Region is already here, or somebody called him a moment ago.",
+                                   "Председатель Угольного края уже здесь — или его только что вызвали.",
+                                   "Przewodniczący Kraju Węglowego już tu jest albo ktoś właśnie go wezwał."),
     "message.donbass.siren_peaceful": ("The siren stays silent on Peaceful difficulty.",
                                        "На мирной сложности сирена молчит.",
                                        "Na poziomie pokojowym syrena milczy."),
-    "message.donbass.siren_no_room": ("There is not enough open space here to call Mr. Terrikonov.",
-                                      "Здесь слишком тесно, чтобы вызвать Господина Терриконова.",
-                                      "Jest tu zbyt ciasno, by wezwać Pana Terrikonowa."),
-    "tooltip.donbass.siren": ("Use on open ground to call Mr. Terrikonov (boss). Consumed on use.",
-                              "ПКМ на открытой местности вызывает Господина Терриконова (босс). Расходуется.",
-                              "PPM na otwartym terenie wzywa Pana Terrikonowa (boss). Zużywa się."),
+    "message.donbass.siren_no_room": ("There is not enough open space here to call the Chairman of the Coal Region.",
+                                      "Здесь слишком тесно, чтобы вызвать Председателя Угольного края.",
+                                      "Jest tu zbyt ciasno, by wezwać Przewodniczącego Kraju Węglowego."),
+    "tooltip.donbass.siren": ("Use on open ground to call the Chairman of the Coal Region (boss). Consumed on use.",
+                              "ПКМ на открытой местности вызывает Председателя Угольного края (босс). Расходуется.",
+                              "PPM na otwartym terenie wzywa Przewodniczącego Kraju Węglowego (boss). Zużywa się."),
     "tooltip.donbass.siren_hint": ("Bring armour, plenty of rounds and friends.",
                                    "Берите броню, много патронов и друзей.",
                                    "Zabierz zbroję, dużo naboi i przyjaciół."),
@@ -517,4 +527,172 @@ LANG_EXTRA.update({
     "gui.donbass.workbench.chip.barrel": ("Brl", "Ств", "Luf"),
     "gui.donbass.workbench.chip.spring": ("Spr", "Пру", "Spr"),
     "message.donbass.workbench_installed": ("Installed: %s", "Установлено: %s", "Zainstalowano: %s"),
+})
+
+# ---- 0.4.0 lang: the commands /donbass bosshp and /donbasshelp (en, ru, pl) -------------------------------
+# Notes: a literal percent sign in a lang value is written "%%" (the game's formatter reads "% " followed by a letter as
+# a placeholder); %1$s... are the arguments passed by DonbassCommands (see the comments there): bosshp.current / .set get
+# (multiplier, health), bosshp.usage gets (min, max), the error texts get (typed text, min, max).
+LANG_EXTRA.update({
+    "command.donbass.usage": (
+        "Donbass commands: /donbasshelp - the guide; /donbass bosshp [multiplier] - the boss health multiplier.",
+        "Команды Донбасса: /donbasshelp — справка; /donbass bosshp [множитель] — множитель здоровья босса.",
+        "Komendy Donbasu: /donbasshelp – poradnik; /donbass bosshp [mnożnik] – mnożnik zdrowia bossa."),
+    "command.donbass.bosshp.current": (
+        "Boss health multiplier: x%1$s (a new boss gets %2$s HP).",
+        "Множитель здоровья босса: ×%1$s (новый босс получит %2$s HP).",
+        "Mnożnik zdrowia bossa: ×%1$s (nowy boss dostanie %2$s HP)."),
+    "command.donbass.bosshp.usage": (
+        "Usage: /donbass bosshp <multiplier> - a number with a decimal point from %1$s to %2$s, for example 1.5 (operators only).",
+        "Синтаксис: /donbass bosshp <множитель> — число через точку от %1$s до %2$s, например 1.5 (только для операторов).",
+        "Składnia: /donbass bosshp <mnożnik> – liczba z kropką dziesiętną od %1$s do %2$s, np. 1.5 (tylko dla operatorów)."),
+    "command.donbass.bosshp.set": (
+        "Boss health multiplier set to x%1$s: the next boss will have %2$s HP. A boss that already stands is not changed.",
+        "Множитель здоровья босса: ×%1$s. Следующий босс получит %2$s HP; уже стоящий босс не меняется.",
+        "Mnożnik zdrowia bossa ustawiony na ×%1$s. Następny boss dostanie %2$s HP; boss, który już stoi, się nie zmienia."),
+    "command.donbass.bosshp.no_permission": (
+        "Only operators (OP) can change the boss health multiplier. Read it with /donbass bosshp, the guide is /donbasshelp.",
+        "Менять множитель здоровья босса могут только операторы (OP). Посмотреть его можно командой /donbass bosshp, справка — /donbasshelp.",
+        "Mnożnik zdrowia bossa mogą zmieniać tylko operatorzy (OP). Aktualną wartość pokaże /donbass bosshp, poradnik – /donbasshelp."),
+    "command.donbass.bosshp.error.empty": (
+        "No multiplier given. Usage: /donbass bosshp <multiplier>, for example /donbass bosshp 1.5 (from %2$s to %3$s, decimal point).",
+        "Множитель не указан. Синтаксис: /donbass bosshp <множитель>, например /donbass bosshp 1.5 (от %2$s до %3$s, дробная часть через точку).",
+        "Nie podano mnożnika. Składnia: /donbass bosshp <mnożnik>, np. /donbass bosshp 1.5 (od %2$s do %3$s, część dziesiętna po kropce)."),
+    "command.donbass.bosshp.error.format": (
+        "\"%1$s\" is not a number. Usage: /donbass bosshp <multiplier>, for example /donbass bosshp 1.5 (from %2$s to %3$s, decimal point).",
+        "«%1$s» — не число. Синтаксис: /donbass bosshp <множитель>, например /donbass bosshp 1.5 (от %2$s до %3$s, дробная часть через точку).",
+        "„%1$s” to nie liczba. Składnia: /donbass bosshp <mnożnik>, np. /donbass bosshp 1.5 (od %2$s do %3$s, część dziesiętna po kropce)."),
+    "command.donbass.bosshp.error.comma": (
+        "Use a dot, not a comma: /donbass bosshp 1.5 (you typed \"%1$s\").",
+        "Дробная часть пишется через точку, а не через запятую: /donbass bosshp 1.5 (вы ввели «%1$s»).",
+        "Część dziesiętną zapisuje się po kropce, nie po przecinku: /donbass bosshp 1.5 (wpisano „%1$s”)."),
+    "command.donbass.bosshp.error.negative": (
+        "The multiplier must be positive (you typed \"%1$s\"). Usage: /donbass bosshp <multiplier>, from %2$s to %3$s.",
+        "Множитель должен быть положительным (вы ввели «%1$s»). Синтаксис: /donbass bosshp <множитель>, от %2$s до %3$s.",
+        "Mnożnik musi być dodatni (wpisano „%1$s”). Składnia: /donbass bosshp <mnożnik>, od %2$s do %3$s."),
+    "command.donbass.bosshp.error.zero": (
+        "The multiplier cannot be zero. Usage: /donbass bosshp <multiplier>, from %2$s to %3$s.",
+        "Множитель не может быть нулевым. Синтаксис: /donbass bosshp <множитель>, от %2$s до %3$s.",
+        "Mnożnik nie może być zerem. Składnia: /donbass bosshp <mnożnik>, od %2$s do %3$s."),
+    "command.donbass.bosshp.error.min": (
+        "\"%1$s\" is too small: the lowest multiplier is %2$s. Usage: /donbass bosshp <multiplier>, from %2$s to %3$s.",
+        "«%1$s» — слишком мало: минимальный множитель %2$s. Синтаксис: /donbass bosshp <множитель>, от %2$s до %3$s.",
+        "„%1$s” to za mało: najmniejszy mnożnik to %2$s. Składnia: /donbass bosshp <mnożnik>, od %2$s do %3$s."),
+    "command.donbass.bosshp.error.max": (
+        "\"%1$s\" is too large: the highest multiplier is %3$s (the game limits health to 1024). Usage: /donbass bosshp <multiplier>, from %2$s to %3$s.",
+        "«%1$s» — слишком много: максимальный множитель %3$s (игра ограничивает здоровье значением 1024). Синтаксис: /donbass bosshp <множитель>, от %2$s до %3$s.",
+        "„%1$s” to za dużo: największy mnożnik to %3$s (gra ogranicza zdrowie do 1024). Składnia: /donbass bosshp <mnożnik>, od %2$s do %3$s."),
+
+    # ---- /donbasshelp: blocks (title + lines + examples); only what exists in the mod --------------------------
+    "command.donbass.help.title": ("=== Donbass: guide ===", "=== Донбасс: справка ===", "=== Donbas: poradnik ==="),
+    "command.donbass.help.footer": (
+        "One block only: /donbasshelp factions | weapons | world | boss | bosshp | coop",
+        "Только один блок: /donbasshelp factions | weapons | world | boss | bosshp | coop",
+        "Tylko jeden blok: /donbasshelp factions | weapons | world | boss | bosshp | coop"),
+
+    "command.donbass.help.factions.title": ("Factions and NPCs", "Фракции и NPC", "Frakcje i NPC"),
+    "command.donbass.help.factions.1": (
+        "Miners: peaceful traders; they sell for Miner's Tokens and offer more as their level grows. Hit one and it hits back, and its mates help.",
+        "Шахтёры — мирные торговцы: продают за жетоны шахтёра, с ростом уровня ассортимент богаче. Ударите — ответит киркой, и соседи придут на помощь.",
+        "Górnicy – pokojowi handlarze: sprzedają za żetony górnika, a im wyższy poziom, tym lepsza oferta. Uderzony oddaje kilofem, a koledzy pomagają."),
+    "command.donbass.help.factions.2": (
+        "DPR and LPR militiamen: hostile riflemen (recruit, fighter, sergeant) at checkpoints, plants, stations and deep mines.",
+        "Ополченцы ДНР и ЛНР — враждебные стрелки (новобранец, боец, сержант): блокпосты, заводы, станции, глубокие шахты.",
+        "Milicjanci DRL i ŁRL – wrogo nastawieni strzelcy (rekrut, bojownik, sierżant): posterunki, zakłady, stacje, głębokie kopalnie."),
+    "command.donbass.help.factions.3": (
+        "The two squads also shoot at each other (switch off in the config: factionsFight). They drop rounds, parts and pieces of their uniform.",
+        "Два отряда стреляют и друг в друга (отключается в конфиге: factionsFight). Из них выпадают патроны, запчасти и части формы.",
+        "Oba oddziały strzelają też do siebie (można wyłączyć w konfiguracji: factionsFight). Wypadają z nich naboje, części do broni i elementy munduru."),
+
+    "command.donbass.help.weapons.title": ("Weapons and combat", "Оружие и бой", "Broń i walka"),
+    "command.donbass.help.weapons.1": (
+        "AK rifle: hold Use to fire, Shift + Use to reload (rounds come from your inventory). You shoot more accurately while sneaking.",
+        "Автомат АК: удерживайте ПКМ — стрельба, Shift + ПКМ — перезарядка (патроны берутся из инвентаря). Приседая, стреляете точнее.",
+        "Karabinek AK: przytrzymaj PPM – strzał, Shift + PPM – przeładowanie (naboje bierze z ekwipunku). Kucając, strzelasz celniej."),
+    "command.donbass.help.weapons.2": (
+        "Weapon Workbench: installs up to five AK modifications, one of each kind - magazine, reload, stabilizer, barrel, spring.",
+        "Оружейный верстак: ставит до пяти модификаций АК, по одной каждого вида — магазин, перезарядка, стабилизатор, ствол, пружина.",
+        "Warsztat zbrojeniowy: montuje do pięciu modyfikacji AK, po jednej z każdego rodzaju – magazynek, przeładowanie, stabilizator, lufa, sprężyna."),
+    "command.donbass.help.weapons.3": (
+        "Armour: miner's clothes and coal armour (full-set bonuses), DPR and LPR military uniforms.",
+        "Броня: шахтёрская одежда и угольная броня (бонусы за полный комплект), военная форма ДНР и ЛНР.",
+        "Pancerz: ubranie górnika i zbroja węglowa (premie za pełny komplet) oraz mundury wojskowe DRL i ŁRL."),
+
+    "command.donbass.help.world.title": ("The world", "Мир", "Świat"),
+    "command.donbass.help.world.1": (
+        "Donbass Travel Voucher: Use it in the Overworld to go to the Donbass dimension, and there to come back.",
+        "Путёвка в Донбасс: ПКМ в Верхнем мире — перенос в измерение «Донбасс», там же — обратно.",
+        "Skierowanie do Donbasu: PPM w Overworldzie przenosi do wymiaru Donbas, a tam – z powrotem."),
+    "command.donbass.help.world.2": (
+        "Mines: shallow (hard hats and tools), active (miner's clothes, parts), deep (coal armour, weapon parts, a rare AK).",
+        "Шахты: мелкие (каски и инструменты), действующие (шахтёрская одежда, запчасти), глубокие (угольная броня, запчасти, редкий АК).",
+        "Kopalnie: płytkie (kaski i narzędzia), czynne (ubranie górnika, części), głębokie (zbroja węglowa, części do broni, rzadki AK)."),
+    "command.donbass.help.world.3": (
+        "Settlements, plants and freight stations: loot, miners and sometimes fighters. A rare Administration building holds the boss siren.",
+        "Посёлки, заводы и грузовые станции: лут, шахтёры, иногда бойцы. В редком «Административном корпусе» лежит сирена босса.",
+        "Osiedla, zakłady i stacje towarowe: łup, górnicy, czasem bojownicy. W rzadkim Budynku administracji leży syrena bossa."),
+    "command.donbass.help.world.4": (
+        "A checkpoint is held by one squad and flies its flag: DPR (black, blue, red) or LPR (light blue, blue, red). Its chests hold rounds, magazines and that squad's uniform.",
+        "Блокпост охраняет один отряд, над ним развевается его флаг: ДНР (чёрный, синий, красный) или ЛНР (голубой, синий, красный). В сундуках — патроны, магазины и форма этого отряда.",
+        "Posterunku strzeże jeden oddział, a nad nim powiewa jego flaga: DRL (czarna, niebieska, czerwona) lub ŁRL (błękitna, niebieska, czerwona). W skrzyniach są naboje, magazynki i mundur tego oddziału."),
+
+    "command.donbass.help.boss.title": (
+        "The boss: Chairman of the Coal Region", "Босс: Председатель Угольного края", "Boss: Przewodniczący Kraju Węglowego"),
+    "command.donbass.help.boss.1": (
+        "He never appears on his own. His siren calls him: Use it on open ground (it is used up). It does not work on Peaceful, or if another Chairman is within 160 blocks.",
+        "Сам не появляется. Его вызывает сирена: ПКМ на открытом месте (расходуется). Не работает на мирной сложности и если рядом (160 блоков) уже есть другой Председатель.",
+        "Sam się nie pojawia. Przywołuje go syrena: PPM na otwartym terenie (zużywa się). Nie działa na poziomie pokojowym ani gdy w promieniu 160 bloków stoi już inny Przewodniczący."),
+    "command.donbass.help.boss.2": (
+        "Siren: craft it (2 coal plates, bell, 2 rifle magazines, anthracite block, 2 weapon parts, diamond - plate, bell, plate / magazine, block, magazine / parts, diamond, parts) or find it in the Administration building.",
+        "Сирена: скрафтите (2 угольные пластины, колокол, 2 магазина, блок антрацита, 2 оружейные запчасти, алмаз — пластина, колокол, пластина / магазин, блок, магазин / запчасти, алмаз, запчасти) или найдите в «Административном корпусе».",
+        "Syrena: wytwórz ją (2 płyty węglowe, dzwon, 2 magazynki, blok antracytu, 2 części do broni, diament – płyta, dzwon, płyta / magazynek, blok, magazynek / części, diament, części) albo znajdź w Budynku administracji."),
+    "command.donbass.help.boss.3": (
+        "Three phases (below 66%% and 33%% of his health); he is invulnerable for about 3 seconds while changing phase. Bring armour, rounds and friends.",
+        "Три фазы (ниже 66%% и 33%% здоровья); при смене фазы около 3 секунд неуязвим. Берите броню, патроны и друзей.",
+        "Trzy fazy (poniżej 66%% i 33%% zdrowia); przy zmianie fazy przez ok. 3 sekundy jest nietykalny. Zabierz pancerz, naboje i przyjaciół."),
+    "command.donbass.help.boss.4": (
+        "Rewards: the Chairman's Pickaxe and Badge of Merit, tokens, diamonds, coal plates, rounds and parts.",
+        "Награда: именная кирка и знак отличия Председателя, жетоны, алмазы, угольные пластины, патроны, запчасти.",
+        "Nagroda: imienny kilof i odznaka zasługi Przewodniczącego, żetony, diamenty, płyty węglowe, naboje, części do broni."),
+
+    "command.donbass.help.bosshp.title": ("Boss health: /donbass bosshp", "Здоровье босса: /donbass bosshp", "Zdrowie bossa: /donbass bosshp"),
+    "command.donbass.help.bosshp.1": (
+        "Sets the multiplier of the boss's maximum health (default 1.0). Only operators (OP) can change it; everybody can read it.",
+        "Задаёт множитель максимального здоровья босса (по умолчанию 1.0). Менять могут только операторы (OP), смотреть — все.",
+        "Ustawia mnożnik maksymalnego zdrowia bossa (domyślnie 1.0). Zmieniać mogą tylko operatorzy (OP), odczytać – wszyscy."),
+    "command.donbass.help.bosshp.2": (
+        "It applies to a boss summoned after the change; a boss that already stands keeps his health. Damage and behaviour do not change.",
+        "Действует на босса, которого призовут после изменения; уже стоящий босс не меняется. Урон и поведение не меняются.",
+        "Działa na bossa przywołanego po zmianie; boss, który już stoi, zachowuje zdrowie. Obrażenia i zachowanie się nie zmieniają."),
+    "command.donbass.help.bosshp.3": (
+        "Allowed: 0.1 to 3.2 with a decimal point (the game caps health at 1024); the value is saved with the world.",
+        "Допустимо от 0.1 до 3.2, дробная часть через точку (игра ограничивает здоровье значением 1024); значение сохраняется вместе с миром.",
+        "Dozwolone od 0.1 do 3.2, część dziesiętna po kropce (gra ogranicza zdrowie do 1024); wartość jest zapisywana ze światem."),
+    "command.donbass.help.bosshp.ex1": (
+        "/donbass bosshp - show the current value", "/donbass bosshp — показать текущий множитель",
+        "/donbass bosshp – pokaż bieżącą wartość"),
+    "command.donbass.help.bosshp.ex2": (
+        "/donbass bosshp 2 - twice the health", "/donbass bosshp 2 — вдвое больше здоровья",
+        "/donbass bosshp 2 – dwa razy więcej zdrowia"),
+    "command.donbass.help.bosshp.ex3": (
+        "/donbass bosshp 1.5 - one and a half times", "/donbass bosshp 1.5 — в полтора раза больше",
+        "/donbass bosshp 1.5 – półtora raza więcej"),
+    "command.donbass.help.bosshp.ex4": (
+        "/donbass bosshp 3 - three times the health", "/donbass bosshp 3 — втрое больше здоровья",
+        "/donbass bosshp 3 – trzy razy więcej zdrowia"),
+    "command.donbass.help.bosshp.ex5": (
+        "/donbass bosshp 0.75 - 75%% of the standard health", "/donbass bosshp 0.75 — 75%% стандартного здоровья",
+        "/donbass bosshp 0.75 – 75%% standardowego zdrowia"),
+
+    "command.donbass.help.coop.title": (
+        "Co-op: recommended boss health", "Кооператив: рекомендуемое здоровье босса", "Kooperacja: zalecane zdrowie bossa"),
+    "command.donbass.help.coop.1": ("1 player: x1.0", "1 игрок: ×1.0", "1 gracz: ×1.0"),
+    "command.donbass.help.coop.2": ("2 players: x1.5", "2 игрока: ×1.5", "2 graczy: ×1.5"),
+    "command.donbass.help.coop.3": ("3 players: x2.0", "3 игрока: ×2.0", "3 graczy: ×2.0"),
+    "command.donbass.help.coop.4": ("4 players: x2.5", "4 игрока: ×2.5", "4 graczy: ×2.5"),
+    "command.donbass.help.coop.5": ("5-6 players: x3.0", "5–6 игроков: ×3.0", "5–6 graczy: ×3.0"),
+    "command.donbass.help.coop.6": (
+        "These are approximate values: change them to suit your gear and the damage your group deals. Set them with /donbass bosshp before summoning the boss.",
+        "Значения ориентировочные: меняйте их под вашу экипировку и урон отряда. Задайте командой /donbass bosshp до призыва босса.",
+        "To wartości orientacyjne: zmieniaj je zależnie od ekwipunku i obrażeń zadawanych przez grupę. Ustaw je komendą /donbass bosshp przed przywołaniem bossa."),
 })

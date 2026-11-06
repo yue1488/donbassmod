@@ -1,5 +1,7 @@
 package com.donbass.mod.entity;
 
+import com.donbass.mod.boss.BossMultiplier;
+import com.donbass.mod.boss.BossSettings;
 import com.donbass.mod.combat.Ballistics;
 import com.donbass.mod.config.DonbassConfig;
 import com.donbass.mod.entity.ai.DirectorMoveGoal;
@@ -174,13 +176,21 @@ public class CombineDirectorEntity extends Monster {
         return data;
     }
 
-    /** Health from the config, the rifle and the coal armour (none of it drops: the loot table decides). */
+    /**
+     * Health from the config times the world's boss multiplier ({@code /donbass bosshp}), the rifle and the coal
+     * armour (none of it drops: the loot table decides). Runs once per boss ({@code initialized} is saved in the NBT,
+     * and so is the resulting max health), so the multiplier is never applied twice and a later change of the
+     * command does not touch a boss that is already standing. The phases and the boss bar work with the fraction
+     * health / max health, so they follow the multiplier without any further change.
+     */
     private void setUp() {
         if (initialized) {
             return;
         }
         initialized = true;
-        setBase(Attributes.MAX_HEALTH, DonbassConfig.bossHealth());
+        double multiplier = this.level() instanceof ServerLevel server
+                ? BossSettings.get(server.getServer()).healthMultiplier() : BossMultiplier.DEFAULT;
+        setBase(Attributes.MAX_HEALTH, BossMultiplier.health(DonbassConfig.bossHealth(), multiplier));
         this.setHealth(this.getMaxHealth());
         applyPhaseStats(getPhase());
         ItemStack rifle = new ItemStack(ModItems.AK_RIFLE.get());

@@ -3,8 +3,8 @@
   "category": "misc",
   "pattern": [
     "PBP",
-    "GDG",
-    "P P"
+    "MAM",
+    "GDG"
   ],
   "key": {
     "P": {
@@ -13,8 +13,14 @@
     "B": {
       "item": "minecraft:bell"
     },
+    "M": {
+      "item": "donbass:rifle_magazine"
+    },
+    "A": {
+      "item": "donbass:anthracite_block"
+    },
     "G": {
-      "item": "minecraft:gold_ingot"
+      "item": "donbass:gun_parts"
     },
     "D": {
       "item": "minecraft:diamond"

@@ -895,10 +895,443 @@ def check_structure_biomes():
     print(f"  structure biomes: {count} structures are limited to {sorted(tag['values'])}")
 
 
+# ======================================================================== 0.4.0 =======================================
+def _lang(code):
+    return load(os.path.join(ASSETS, "lang", code + ".json")) or {}
+
+
+def check_names_040():
+    """0.4.0: the two uniforms are named after their republic, the boss items after the new boss name, and the old
+    names are gone from every displayed text (the registry ids did not change)."""
+    langs = {"en": _lang("en_us"), "ru": _lang("ru_ru"), "pl": _lang("pl_pl")}
+    marks = {"DPR": {"en": "DPR", "ru": "ДНР", "pl": "DRL"}, "LPR": {"en": "LPR", "ru": "ЛНР", "pl": "ŁRL"}}
+    word = {"en": "Military Uniform", "ru": "военной формы", "pl": "munduru wojskowego"}
+    seen = set()
+    for prefix, rep in (("steppe", "DPR"), ("terricone", "LPR")):
+        other = "LPR" if rep == "DPR" else "DPR"
+        for piece in ("helmet", "jacket", "trousers", "boots"):
+            key = f"item.donbass.{prefix}_{piece}"
+            for lg, d in langs.items():
+                name = d.get(key, "")
+                if marks[rep][lg] not in name:
+                    err(f"uniform {key} ({lg}): '{name}' does not name {marks[rep][lg]}")
+                if marks[other][lg] in name:
+                    err(f"uniform {key} ({lg}): '{name}' names the other republic")
+                if word[lg] not in name:
+                    err(f"uniform {key} ({lg}): '{name}' lacks the wording '{word[lg]}'")
+                if (lg, name) in seen:
+                    err(f"uniform {key} ({lg}): the name '{name}' is used twice")
+                seen.add((lg, name))
+    # the name «Председатель Угольного края» / "Chairman of the Coal Region" / "Przewodniczący Kraju Węglowego" is
+    # declined in ru / pl ("Председателя", "Przewodniczącego"), so the stem of the title and the fixed words are checked
+    for k, v in langs["en"].items():
+        if "DNR" in v or "LNR" in v:
+            err(f"lang en: {k} uses DNR / LNR: the English texts say DPR / LPR ('{v}')")
+    boss = {"en": ("Chairman", "Coal Region"), "ru": ("Председател", "Угольного края"),
+            "pl": ("Przewodnicząc", "Kraju Węglowego")}
+    nominative = {"en": "Chairman of the Coal Region", "ru": "Председатель Угольного края",
+                  "pl": "Przewodniczący Kraju Węglowego"}
+    for lg, d in langs.items():
+        if d.get("entity.donbass.combine_director") != nominative[lg]:
+            err(f"boss name: entity.donbass.combine_director ({lg}) must be exactly '{nominative[lg]}'")
+    # entity, the three items, the messages and the siren tooltip must carry the new name
+    for key in ("entity.donbass.combine_director", "item.donbass.combine_siren", "item.donbass.director_pickaxe",
+                "item.donbass.director_badge", "message.donbass.director_summon", "message.donbass.director_defeated",
+                "message.donbass.siren_busy", "message.donbass.siren_no_room", "tooltip.donbass.siren"):
+        for lg, d in langs.items():
+            if not all(part in d.get(key, "") for part in boss[lg]):
+                err(f"boss name: {key} ({lg}) = '{d.get(key)}' does not contain the new boss name {boss[lg]}")
+    old = ("Терриконов", "Terrikonov", "Terrikonow", "Директорск", "Именная кирка директора", "dyrektora", "Director's",
+           "Combine Siren", "Сирена комбината", "Syrena kombinatu", "Steppe Field", "Steppe Combat", "Terricone Field",
+           "Terricone Combat", "«Степь»", "«Терикон»", "„Step”", "„Hałda”")
+    for lg, d in langs.items():
+        for k, v in d.items():
+            for o in old:
+                # "Syrena kombinatu wyje" is the subtitle of the siren SOUND (a factory siren), not an item name
+                if o in v and k != "subtitles.donbass.item.director_siren":
+                    err(f"lang {lg}: {k} still contains the old name '{o}'")
+    # registry ids are the same as before (old worlds keep their items)
+    ids = {i["id"] for i in ITEMS}
+    for needed in ("combine_siren", "director_pickaxe", "director_badge", "steppe_helmet", "steppe_jacket",
+                   "steppe_trousers", "steppe_boots", "terricone_helmet", "terricone_jacket", "terricone_trousers",
+                   "terricone_boots"):
+        if needed not in ids:
+            err(f"registry id {needed} is gone: existing worlds would lose the item")
+    if "combine_director" not in registered_entities():
+        err("entity id combine_director is gone")
+    print("  names: 8 uniform pieces (DPR / LPR), boss name in 9 texts x 3 languages, no old names left")
+
+
+# the 0.3.1 values of everything that must not change, and the 0.4.0 values of what was rebalanced
+STRUCTURE_SETS_040 = {
+    # name: (salt, spacing, separation, exclusion zone)
+    "shallow_mines": (1730102, 10, 4, None),
+    "active_mines": (1730103, 20, 7, ("miners_settlements", 3)),
+    "deep_mines": (1730104, 24, 8, ("miners_settlements", 3)),
+}
+
+
+def _structure_set(name):
+    d = load(os.path.join(DATA, "worldgen", "structure_set", name + ".json")) or {}
+    pl = d.get("placement", {})
+    ez = pl.get("exclusion_zone")
+    return pl, (ez["other_set"].replace("donbass:", ""), ez["chunk_count"]) if ez else None, d
+
+
+def check_structure_rebalance():
+    """0.4.0: settlements a little rarer (larger spacing), checkpoints a little more frequent (smaller spacing), the
+    mines exactly as before.  random_spread puts ONE candidate into every spacing x spacing region of chunks, so the
+    density is 1 / spacing^2; the separation only keeps neighbouring candidates apart.  Moderate = within 25 %."""
+    for name, (salt, spacing, sep, ez) in STRUCTURE_SETS_040.items():
+        pl, zone, _ = _structure_set(name)
+        got = (pl.get("salt"), pl.get("spacing"), pl.get("separation"), zone)
+        if pl.get("type") != "minecraft:random_spread" or got != (salt, spacing, sep, ez):
+            err(f"structure set {name} changed: {got} != {(salt, spacing, sep, ez)} (the mines must not change)")
+    for name in ("shallow_mines", "active_mines", "deep_mines"):
+        _, _, d = _structure_set(name)
+        if len(d.get("structures", [])) != 1:
+            err(f"structure set {name}: the structure list changed")
+    s_pl, _, _ = _structure_set("miners_settlements")
+    b_pl, b_zone, _ = _structure_set("blockposts")
+    if s_pl.get("salt") != 1730101 or b_pl.get("salt") != 1730107:
+        err("the salts of settlements / blockposts changed (the layout of existing candidates would shuffle)")
+    if not s_pl.get("spacing", 0) > 16:
+        err(f"settlements must be rarer than in 0.3.1 (spacing > 16), spacing is {s_pl.get('spacing')}")
+    if not b_pl.get("spacing", 99) < 14:
+        err(f"checkpoints must be more frequent than in 0.3.1 (spacing < 14), spacing is {b_pl.get('spacing')}")
+    s_ratio = 16 ** 2 / s_pl.get("spacing", 16) ** 2
+    b_ratio = 14 ** 2 / b_pl.get("spacing", 14) ** 2
+    if not 0.75 <= s_ratio < 1.0:
+        err(f"settlement density x{s_ratio:.2f} of the old one: not 'a little rarer' (0.75 .. 1.0)")
+    if not 1.0 < b_ratio <= 1.25:
+        err(f"checkpoint density x{b_ratio:.2f} of the old one: not 'a little more frequent' (1.0 .. 1.25)")
+    for pl in (s_pl, b_pl):
+        if not 0 < pl.get("separation", 0) < pl.get("spacing", 0):
+            err(f"structure set: separation must be positive and smaller than the spacing: {pl}")
+    if s_pl.get("separation") != 6 or b_pl.get("separation") != 5 or b_zone != ("miners_settlements", 3):
+        err("separation / exclusion zone of the settlements or checkpoints changed (not part of the rebalance)")
+    print(f"  structure rebalance: settlements spacing {s_pl['spacing']} (density x{s_ratio:.2f}), checkpoints spacing "
+          f"{b_pl['spacing']} (x{b_ratio:.2f}), 3 mine sets unchanged")
+
+
+def _template_blocks(rel):
+    t = read_template(os.path.join(DATA, "structures", rel))
+    names = [e["Name"] for e in t["palette"]]
+    return {tuple(b["pos"]): names[b["state"]] for b in t["blocks"]}, tuple(t["size"])
+
+
+FLAGS_040 = {
+    # template -> (faction label, stripes top to bottom)
+    "military/blockpost_north.nbt": ("DPR", ["minecraft:black_wool", "minecraft:blue_wool", "minecraft:red_wool"]),
+    "military/blockpost_south.nbt": ("LPR", ["minecraft:light_blue_wool", "minecraft:blue_wool", "minecraft:red_wool"]),
+}
+
+
+def check_flags():
+    """0.4.0: every checkpoint template carries exactly one flag, of the republic whose squad holds it: the DPR flag
+    (black / blue / red) on the "north" (DPR) post, the LPR flag (light blue / blue / red) on the "south" (LPR) post.
+    The flag is part of the template (generated with the structure), hangs on a pole that stands on the ground layer,
+    towers above the walls and the watchtower, and is not inside anything."""
+    from structures_military import SQUADS
+    if set(SQUADS) != {"north", "south"}:
+        err("structures_military.SQUADS changed")
+    for rel, (label, stripes) in FLAGS_040.items():
+        blocks, (sx, sy, sz) = _template_blocks(rel)
+        wool = {pos: n for pos, n in blocks.items() if n.endswith("_wool")}
+        if len(wool) != 12:
+            err(f"{rel}: expected one flag of 4 x 3 wool blocks, found {len(wool)} wool blocks")
+            continue
+        xs = sorted({x for x, _, _ in wool}), sorted({y for _, y, _ in wool}), sorted({z for _, _, z in wool})
+        if len(xs[2]) != 1 or xs[0] != list(range(xs[0][0], xs[0][0] + 4)) or xs[1] != list(range(xs[1][0], xs[1][0] + 3)):
+            err(f"{rel}: the wool is not one flat 4 x 3 rectangle ({xs})")
+            continue
+        z, x0, y_top = xs[2][0], xs[0][0], xs[1][-1]
+        for row, stripe in enumerate(stripes):                       # stripes from the top down
+            for x in xs[0]:
+                got = wool.get((x, y_top - row, z))
+                if got != stripe:
+                    err(f"{rel}: {label} flag stripe {row + 1} at x={x}: {got} != {stripe}")
+        # the other republic's top colour must not appear anywhere in this template
+        for other_rel, (other_label, other_stripes) in FLAGS_040.items():
+            if other_rel != rel and other_stripes[0] in wool.values():
+                err(f"{rel}: contains the {other_label} flag colour {other_stripes[0]}")
+        # the pole: a continuous girder column right next to the flag, standing on a solid ground-layer block
+        pole = [pos for pos, n in blocks.items() if n == "donbass:steel_girder" and pos[0] == x0 - 1 and pos[2] == z]
+        ys = sorted(y for _, y, _ in pole)
+        if not ys or ys != list(range(ys[0], ys[-1] + 1)):
+            err(f"{rel}: the flag pole is missing or has gaps")
+            continue
+        if ys[-1] < y_top:
+            err(f"{rel}: the pole (top y={ys[-1]}) is lower than the flag (top y={y_top})")
+        base = blocks.get((x0 - 1, ys[0] - 1, z))
+        if base is None or base == "minecraft:air" or base.endswith("_wool"):
+            err(f"{rel}: the pole does not stand on solid ground ({base} below y={ys[0]})")
+        if ys[0] != 2:
+            err(f"{rel}: the pole must start on the yard layer (y=2), starts at y={ys[0]}")
+        # nothing floats: every flag block touches the pole or the next flag block towards the pole
+        for (x, y, zz) in wool:
+            nb = (x - 1, y, zz)
+            if nb not in wool and nb not in {(x0 - 1, py, z) for py in ys}:
+                err(f"{rel}: flag block {(x, y, zz)} is not attached")
+        # visible from afar: above the walls (y <= 3) and above the watchtower (its highest block)
+        tower_top = max(y for (x, y, zz), n in blocks.items() if n == "donbass:slag_bricks" and x >= 12 and zz >= 12)
+        wall_top = 3
+        if min(y for _, y, _ in wool) <= wall_top or y_top <= tower_top:
+            err(f"{rel}: the flag (y {min(y for _, y, _ in wool)}..{y_top}) must be above the walls (y {wall_top}) and "
+                f"the tower (top y={tower_top})")
+        # not inside walls and not hanging into other blocks: the cells around the flag are free of solid blocks
+        for (x, y, zz) in wool:
+            for dx, dy, dz in ((1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)):
+                n = blocks.get((x + dx, y + dy, zz + dz))
+                if n is not None and n != "minecraft:air" and not n.endswith("_wool"):
+                    err(f"{rel}: flag block {(x, y, zz)} touches {n} at {(x + dx, y + dy, zz + dz)}")
+        if x0 + 3 >= sx or y_top >= sy:
+            err(f"{rel}: the flag leaves the template box")
+    # no other structure carries a faction flag: wool in templates other than the checkpoints and the (white) pennants
+    for path in glob.glob(os.path.join(DATA, "structures", "**", "*.nbt"), recursive=True):
+        rel = os.path.relpath(path, os.path.join(DATA, "structures")).replace(os.sep, "/")
+        if rel in FLAGS_040:
+            continue
+        blocks, _ = _template_blocks(rel)
+        for n in blocks.values():
+            if n in ("minecraft:black_wool", "minecraft:light_blue_wool"):
+                err(f"{rel}: has {n}: a republic's flag only belongs to the checkpoints")
+    print("  flags: DPR (black/blue/red) on blockpost_north, LPR (light blue/blue/red) on blockpost_south, one each")
+
+
+def _lang_keys_in_java(rel_dir):
+    keys = set()
+    for p in glob.glob(os.path.join(JAVA, "com", "donbass", "mod", rel_dir, "**", "*.java"), recursive=True):
+        keys |= set(re.findall(r'"(command\.donbass\.[a-z_.0-9]+)"', open(p, encoding="utf-8").read()))
+    return {k for k in keys if not k.endswith(".")}      # "command.donbass.help." + id is a prefix, not a key
+
+
+def check_commands_and_boss_health():
+    """0.4.0: /donbass bosshp and /donbasshelp.  Static: wiring, permissions, the single place where the multiplier is
+    applied, the persistence, the help text in three languages.  The parsing itself is run by tools/run_selfchecks.sh."""
+    cmd = java_text("command/DonbassCommands.java")
+    mult = java_text("boss/BossMultiplier.java")
+    sett = java_text("boss/BossSettings.java")
+    boss = java_text("entity/CombineDirectorEntity.java")
+    # --- commands
+    if "@Mod.EventBusSubscriber" not in cmd or "Bus.FORGE" not in cmd or "RegisterCommandsEvent" not in cmd:
+        err("DonbassCommands must subscribe to RegisterCommandsEvent on the FORGE bus")
+    for lit in ('Commands.literal("donbasshelp")', 'Commands.literal("donbass")', 'Commands.literal("bosshp")',
+                'Commands.argument("multiplier", StringArgumentType.greedyString())'):
+        if lit not in cmd:
+            err(f"DonbassCommands: {lit} is missing")
+    body = method_body(cmd, r"private static int setBossHealth\([^)]*\)[^{]*\{")
+    if body is None:
+        err("DonbassCommands.setBossHealth not found")
+    else:
+        if "hasPermission(OP_LEVEL)" not in body or body.index("hasPermission") > body.index("BossMultiplier.parse"):
+            err("setBossHealth must check the operator permission BEFORE it parses or stores anything")
+        if "BossSettings.get" not in body or "setHealthMultiplier(" not in body:
+            err("setBossHealth does not store the multiplier in BossSettings")
+    show = method_body(cmd, r"private static int showBossHealth\([^)]*\)[^{]*\{")
+    if show is None or "hasPermission" in show or "setHealthMultiplier" in show:
+        err("showBossHealth (no argument) must be open to everybody and must not change anything")
+    m = re.search(r"OP_LEVEL\s*=\s*(\d+)", cmd)
+    if not m or int(m.group(1)) < 2:
+        err("OP_LEVEL must be at least 2 (operator)")
+    help_body = method_body(cmd, r"private static int help\([^)]*\)[^{]*\{")
+    if help_body is None or "hasPermission" in help_body:
+        err("/donbasshelp must be open to everybody (no permission check)")
+    # --- the multiplier: limits, parsing, one single application
+    lim = {k: float(v) for k, v in re.findall(r"public static final double (DEFAULT|MIN|MAX|ATTRIBUTE_MAX_HEALTH)\s*=\s*([0-9.]+)D", mult)}
+    if lim.get("DEFAULT") != 1.0 or not 0 < lim.get("MIN", 0) < 1.0 <= lim.get("MAX", 0):
+        err(f"BossMultiplier limits are wrong: {lim}")
+    if lim.get("MAX", 0) * 320.0 > lim.get("ATTRIBUTE_MAX_HEALTH", 0) + 1e-6:
+        err("BossMultiplier.MAX x the default boss health (320) is above the max_health attribute limit")
+    if "parseDouble" in mult and "NUMBER.matcher" not in mult:
+        err("BossMultiplier parses without validating the text first (Java accepts '1e3', 'NaN', '1f'...)")
+    # the multiplier is applied in setUp() and nowhere else of the boss
+    uses = [mm.start() for mm in re.finditer(r"BossMultiplier\.health\(|BossSettings\.get\(", boss)]
+    setup = method_body(boss, r"private void setUp\(\)\s*\{")
+    if setup is None or not uses:
+        err("CombineDirectorEntity.setUp does not read the multiplier")
+    else:
+        a = boss.index(setup)
+        if any(not (a <= u < a + len(setup)) for u in uses):
+            err("the boss multiplier is used outside setUp(): it could be applied again")
+        if setup.index("if (initialized)") > setup.index("BossSettings.get"):
+            err("setUp(): the 'initialized' guard must come before the multiplier is read")
+        if "MAX_HEALTH" not in setup or setup.count("MAX_HEALTH") != 1:
+            err("setUp() must set MAX_HEALTH exactly once")
+    if boss.count("Attributes.MAX_HEALTH") != 2:      # createAttributes() default + setUp()
+        err("MAX_HEALTH is set somewhere else in the boss: the multiplier could be bypassed or applied twice")
+    for fn in ("applyPhaseStats", "updatePhase", "enterPhase"):
+        b = method_body(boss, r"(private|protected|public) \w+ " + fn + r"\([^)]*\)\s*\{")
+        if b is None or "BossMultiplier" in b or "BossSettings" in b or "MAX_HEALTH" in b:
+            err(f"{fn}() must not touch the health multiplier / max health (phases work on health / max health)")
+    if "getHealth() / this.getMaxHealth()" not in boss:
+        err("the phases must be computed from health / max health")
+    if "ATTACK_DAMAGE" in setup or "bossDamageMultiplier" in (setup or ""):
+        err("setUp() must not touch the damage")
+    # --- persistence
+    if "extends SavedData" not in sett or "setDirty()" not in sett or "getDataStorage().computeIfAbsent" not in sett:
+        err("BossSettings must be a SavedData in the overworld's data storage and call setDirty() on change")
+    if "public CompoundTag save(CompoundTag" not in sett or "putDouble" not in sett:
+        err("BossSettings does not write the multiplier")
+    if "server.overworld()" not in sett:
+        err("BossSettings must live in the overworld's data storage (one value for the whole world)")
+    # --- texts
+    langs = {"en": _lang("en_us"), "ru": _lang("ru_ru"), "pl": _lang("pl_pl")}
+    sections = [(i, int(a), int(b)) for i, a, b in re.findall(r'new Section\("(\w+)",\s*(\d+),\s*(\d+)\)', cmd)]
+    if [s[0] for s in sections] != ["factions", "weapons", "world", "boss", "bosshp", "coop"]:
+        err(f"/donbasshelp sections changed: {[s[0] for s in sections]}")
+    needed = {"command.donbass.help.title", "command.donbass.help.footer", "command.donbass.usage"}
+    for sid, lines, examples in sections:
+        needed.add(f"command.donbass.help.{sid}.title")
+        needed |= {f"command.donbass.help.{sid}.{i}" for i in range(1, lines + 1)}
+        needed |= {f"command.donbass.help.{sid}.ex{i}" for i in range(1, examples + 1)}
+    for e in re.findall(r'\("(command\.donbass\.bosshp\.error\.[a-z_]+)"\)', mult):
+        needed.add(e)
+    needed |= {"command.donbass.bosshp.current", "command.donbass.bosshp.usage", "command.donbass.bosshp.set",
+               "command.donbass.bosshp.no_permission"}
+    needed |= _lang_keys_in_java("command")
+    for lg, d in langs.items():
+        for k in sorted(needed):
+            if k not in d:
+                err(f"lang {lg}: missing {k}")
+        extra = {k for k in d if k.startswith("command.donbass.") and k not in needed}
+        if extra:
+            err(f"lang {lg}: unused command texts {sorted(extra)[:4]}")
+        for k, v in d.items():
+            if k.startswith("command.donbass.") and re.search(r"%(?!%|\d\$s|s)", v.replace("%%", "")):
+                err(f"lang {lg}: {k} has a lone '%' (write '%%'): {v}")
+    # the shown limits and the co-op table (the values of the task) agree with the code and fit into the limits
+    lo, hi = lim.get("MIN", 0), lim.get("MAX", 0)
+    for lg, d in langs.items():
+        t = d.get("command.donbass.help.bosshp.3", "")
+        if f"{lo:g}" not in t or f"{hi:g}" not in t or "1024" not in t:
+            err(f"lang {lg}: bosshp help does not state the limits {lo:g}..{hi:g} and 1024")
+        rows = [d.get(f"command.donbass.help.coop.{i}", "") for i in range(1, 6)]
+        for row, want in zip(rows, ("1.0", "1.5", "2.0", "2.5", "3.0")):
+            if f"×{want}" not in row and f"x{want}" not in row:
+                err(f"lang {lg}: co-op row '{row}' should end with x{want}")
+            if not lo <= float(want) <= hi:
+                err(f"co-op multiplier {want} is outside the allowed range")
+        for i, want in ((1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")):
+            if not rows[i - 1].startswith(want):
+                err(f"lang {lg}: co-op row {i} '{rows[i - 1]}' must start with {want}")
+        if "×" not in d.get("command.donbass.help.coop.5", "") and "x" not in d.get("command.donbass.help.coop.5", ""):
+            err(f"lang {lg}: co-op table is incomplete")
+        if not d.get("command.donbass.help.coop.6"):
+            err(f"lang {lg}: the co-op note ('approximate values') is missing")
+        # the help describes only what exists: crude guard against announcing planned things
+        for k, v in d.items():
+            if k.startswith("command.donbass.help.") and re.search(r"\b(planned|coming soon|TODO|скоро|планируется|wkrótce)\b", v, re.I):
+                err(f"lang {lg}: {k} mentions something only planned")
+    print(f"  commands: /donbasshelp ({len(sections)} blocks) and /donbass bosshp [{lo:g}..{hi:g}], "
+          f"{len(needed)} texts x 3 languages, multiplier applied only in setUp(), persisted in SavedData")
+
+
+def _loot_sources():
+    """item id -> set of ('chest'|'entity'|'block', table) for every loot table of the mod."""
+    out = {}
+    for p in glob.glob(os.path.join(DATA, "loot_tables", "**", "*.json"), recursive=True):
+        rel = os.path.relpath(p, os.path.join(DATA, "loot_tables")).replace(os.sep, "/")[:-5]
+        kind, _, name = rel.partition("/")
+        txt = open(p, encoding="utf-8").read()
+        for m in re.finditer(r'"name":\s*"(donbass:[a-z_]+|minecraft:[a-z_]+)"', txt):
+            item = m.group(1)
+            if kind == "blocks" and item == "donbass:" + name:
+                continue                                    # a block that only drops itself is not a source
+            out.setdefault(item, set()).add((kind, name))
+    return out
+
+
+BOSS_ONLY_TABLES = {("entity", "combine_director")}
+
+
+def check_siren_recipe():
+    """0.4.0: the item that calls the boss has an expensive recipe made of things the player gets in the Donbass before
+    the first fight (never the boss's own badge / pickaxe / siren)."""
+    r = RECIPES.get("combine_siren")
+    if not r or r["type"] != "minecraft:crafting_shaped" or r["result"]["item"] != "donbass:combine_siren":
+        err("RECIPES['combine_siren'] is missing or does not make the siren")
+        return
+    grid = "".join(r["pattern"])
+    slots = [r["key"][c]["item"] for c in grid if c != " "]
+    ours = [i for i in slots if i.startswith("donbass:")]
+    if len(slots) < 8:
+        err(f"siren recipe uses only {len(slots)} slots: it must be expensive (8-9 filled slots)")
+    if len(ours) * 3 < len(slots) * 2:
+        err(f"siren recipe: only {len(ours)} of {len(slots)} slots are Donbass items (must be mostly Donbass items)")
+    if len(set(ours)) < 4:
+        err("siren recipe: at least four different Donbass items are required")
+    if len(set(slots) - set(ours)) > 3:
+        err("siren recipe: at most three kinds of vanilla ingredients")
+    for banned in ("donbass:director_badge", "donbass:director_pickaxe", "donbass:combine_siren",
+                   "donbass:coal_chestplate"):
+        if banned in slots and banned != "donbass:coal_chestplate":
+            err(f"siren recipe uses {banned}, which only the boss / the siren itself gives")
+    sources = _loot_sources()
+    recipe_by_result = {}
+    for name, rec in RECIPES.items():
+        res = rec["result"]["item"] if isinstance(rec["result"], dict) else rec["result"]
+        recipe_by_result.setdefault(res, []).append((name, rec))
+
+    def ingredients(rec):
+        if "ingredients" in rec:
+            return [i.get("item") for i in rec["ingredients"] if "item" in i]
+        if "key" in rec:
+            return [v["item"] for v in rec["key"].values() if "item" in v]
+        return [rec["ingredient"]["item"]] if "ingredient" in rec else []
+
+    def obtainable(item, trail=()):
+        """True if the item can be found or made without the boss; returns the loot-only leaves used."""
+        if item.startswith("minecraft:"):
+            return item_exists(item)
+        if item in trail:
+            return False
+        for kind, name in sources.get(item, ()):
+            if (kind, name) not in BOSS_ONLY_TABLES:
+                return True
+        for _, rec in recipe_by_result.get(item, []):
+            if all(obtainable(i, trail + (item,)) for i in ingredients(rec) if i):
+                return True
+        return False
+
+    for item in sorted(set(slots)):
+        if not obtainable(item):
+            err(f"siren recipe: {item} cannot be obtained without the boss (no chest/drop/block source and no recipe)")
+    # at least one root of the tree that is pure loot (rusty gear / iron scrap): the recipe needs exploration
+    loot_roots = {"donbass:rusty_gear", "donbass:iron_scrap"}
+
+    def roots(item, trail=()):
+        found = set()
+        if item.startswith("minecraft:") or item in trail:
+            return found
+        if item in loot_roots:
+            found.add(item)
+        for _, rec in recipe_by_result.get(item, []):
+            for i in ingredients(rec):
+                found |= roots(i, trail + (item,))
+        return found
+
+    leaves = set()
+    for item in slots:
+        leaves |= roots(item)
+    if not leaves:
+        err("siren recipe: the tree contains no loot-only item (rusty gear / iron scrap), so no exploration is needed")
+    # the sources of the plain Donbass slots (so the report can say where each comes from)
+    where = {}
+    for item in sorted(set(ours)):
+        srcs = sorted({f"{k}:{n}" for k, n in sources.get(item, ()) if (k, n) not in BOSS_ONLY_TABLES})
+        made = [n for n, _ in recipe_by_result.get(item, [])]
+        where[item] = (len(srcs), len(made))
+    print(f"  siren recipe: {len(slots)} slots, {len(ours)} Donbass items ({len(set(ours))} kinds), all obtainable without "
+          f"the boss, loot-only roots: {sorted(x.split(':')[1] for x in leaves)}")
+
+
 def main():
     print("Validating Donbass mod...")
     for fn in (check_templates, check_sounds_and_gear, check_assets, check_lang, check_recipes_and_loot,
-               check_rifle_model, check_worldgen, check_java, check_java_imports, check_boss, check_ak_mods, check_structure_biomes):
+               check_rifle_model, check_worldgen, check_java, check_java_imports, check_boss, check_ak_mods, check_structure_biomes,
+               check_names_040, check_structure_rebalance, check_flags, check_commands_and_boss_health,
+               check_siren_recipe):
         fn()
     for w in warnings:
         print("  warning:", w)
